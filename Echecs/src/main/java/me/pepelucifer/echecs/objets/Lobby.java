@@ -1,5 +1,6 @@
 package me.pepelucifer.echecs.objets;
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.logique.Logique;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,8 +18,8 @@ public final class Lobby{
     ArrayList<LobbyPlayer> playingPlayerList;
 
     public Lobby(){
-        this.world= Echecs.chessWorld;
-        this.spawn= Echecs.lobbySpawn;
+        this.world= Logique.chessWorld;
+        this.spawn=Logique.lobbySpawn;
         this.count=0;
         this.sessionList=new ArrayList<Session>();
         this.waitingPlayerList=new ArrayList<LobbyPlayer>();
@@ -72,12 +73,11 @@ public final class Lobby{
             joueurs.getPlayer().teleport(getLocationDécalée(count));
         }
         count++;
-
     }
 
     public Location getLocationDécalée(int count){
         int x_décalé=50*count;
-        return new Location(Echecs.lobbySpawn.getWorld(),x_décalé,Echecs.lobbySpawn.getY(),Echecs.lobbySpawn.getZ());
+        return new Location(Logique.lobbySpawn.getWorld(),x_décalé,Logique.lobbySpawn.getY(),Logique.lobbySpawn.getZ());
     }
 
     public void checkCreateNewSession(){
@@ -86,18 +86,56 @@ public final class Lobby{
         }
     }
 
+    public void checkValidConnect(Player player){
+        if (!isInLobby(player)){
+            connectPlayer(player);
+        }else{
+            player.sendMessage(ChatColor.RED+"Vous êtes déjà dans un salon d'échecs!");
+        }
+    }
+
+    public void checkValidDisconnect(Player player){
+        if (isInLobby(player)){
+            disconnectPlayer(getLobbyPlayer(player));
+        }else{
+            player.sendMessage(ChatColor.RED+"Vous n'êtes pas dans un salon d'échecs!");
+        }
+    }
+
+    public boolean isInLobby(Player player){
+        /*
+        if (player.getWorld().getName().equals(getWorld().getName())){                          //Ce code est plus performant, mais n'est pas fonctionnel avec le serveur test. On va l'intégrer dans M2C.
+            return true;
+        }else{
+            return false;
+        }
+         */
+        String name=player.getName();
+        for (LobbyPlayer joueurs:getPlayingPlayers()){
+            if (joueurs.getName().equals(name)){
+                return true;
+            }
+        }
+        for (LobbyPlayer joueurs:getWaitingPlayers()){
+            if (joueurs.getName().equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void connectPlayer(Player player){
-        player.teleport(Echecs.lobby.getSpawnLocation());
-        player.sendMessage("Vous avez rejoint un lobby d'échecs.");
-        player.getInventory().addItem(me.pepelucifer.pluginechec.items.ItemManager.chessPiece);
+        player.teleport(Logique.lobby.getSpawnLocation());
+        player.sendMessage(ChatColor.LIGHT_PURPLE+"Bienvenue dans le salon d'échecs!");
+        player.getInventory().addItem(me.pepelucifer.echecs.items.ItemManager.chessPiece);
         waitingPlayerList.add(new LobbyPlayer(player));
         checkCreateNewSession();
     }
 
     public void disconnectPlayer(LobbyPlayer lobbyPlayer){
         lobbyPlayer.getPlayer().teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
-        lobbyPlayer.getPlayer().sendMessage("Vous avez quitté un lobby d'échecs.");
-        lobbyPlayer.getPlayer().getInventory().removeItem(me.pepelucifer.pluginechec.items.ItemManager.chessPiece);
+        lobbyPlayer.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE+"Vous avez quitté la partie");
+        lobbyPlayer.getPlayer().getInventory().removeItem(me.pepelucifer.echecs.items.ItemManager.chessPiece);
         if (lobbyPlayer.isPlaying()){
             playingPlayerList.remove(lobbyPlayer);
             lobbyPlayer.getSession().players.remove(lobbyPlayer);

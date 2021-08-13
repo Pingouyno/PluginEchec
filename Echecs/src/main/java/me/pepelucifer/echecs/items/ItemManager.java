@@ -1,4 +1,4 @@
-package me.pepelucifer.pluginechec.items;
+package me.pepelucifer.echecs.items;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
