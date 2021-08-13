@@ -2,6 +2,7 @@ package me.pepelucifer.echecs.commands;
 
 
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -25,20 +26,10 @@ public class Commands implements CommandExecutor {
     }
 
     public void executeCommand(String cmd, Player player){
-        if (cmd.equals("chess")){
-            LobbyPlayer lobbyPlayer=Echecs.lobby.getLobbyPlayer(player);
-            if (lobbyPlayer==null){
-                Echecs.lobby.connectPlayer(player);
-            }else{
-                player.sendMessage(ChatColor.RED+"Vous êtes déjà dans un salon d'échecs!");
-            }
-        }else if (cmd.equals("quit")){
-            LobbyPlayer lobbyPlayer=Echecs.lobby.getLobbyPlayer(player);
-            if (lobbyPlayer!=null){
-                Echecs.lobby.disconnectPlayer(lobbyPlayer);
-            }else{
-                player.sendMessage(ChatColor.RED+"Vous n'êtes pas dans un salon d'échecs!");
-            }
+        if (cmd.equals("echecs")){
+            Logique.lobby.checkValidConnect(player);
+        }else if (cmd.equals("quitter")){
+            Logique.lobby.checkValidDisconnect(player);
         }
     }
 }

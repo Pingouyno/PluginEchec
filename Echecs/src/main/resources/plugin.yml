@@ -5,11 +5,11 @@ api-version: 1.16
 authors: [ pepelucifer, clement_du_57 ]
 description: Un plugin qui permet de jouer aux échecs sur Minecraft.
 commands:
-  chess:
+  echecs:
     description: Rejoindre un salon d'échecs
     usage: /<command>
-    aliases: c
-  quit:
+    aliases: e
+  quitter:
     description: Quitter un salon d'échecs
     usage: /<command>
     aliases: q

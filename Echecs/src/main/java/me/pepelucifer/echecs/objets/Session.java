@@ -1,5 +1,5 @@
 package me.pepelucifer.echecs.objets;
-import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.logique.Logique;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.scoreboard.Scoreboard;
@@ -20,7 +20,7 @@ public class Session{
         players.add(p1);
         players.add(p2);
         this.started = false;
-        this.lobby= Echecs.lobby;
+        this.lobby=Logique.lobby;
     }
 
     public int getSessionId(){
@@ -41,10 +41,6 @@ public class Session{
 
     public void setScoreBoard(Scoreboard scoreboard){
         this.board=scoreboard;
-    }
-
-    public void getWorld(World world){
-        this.world=world;
     }
 
     public Lobby getLobby(){
