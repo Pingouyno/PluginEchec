@@ -16,11 +16,13 @@ public class Logique {
     public static Location lobbySpawn;
     public static World chessWorld;
     public static Lobby lobby;
+    public static int decalage;
 
     public static void init(){
         lobbySpawn = new Location(Bukkit.getWorlds().get(0),-210.5,91,-371.5);
         chessWorld = Bukkit.getWorlds().get(0);
         lobby = new Lobby();
+        decalage = 50;
     }
 
 
@@ -136,9 +138,9 @@ public class Logique {
         }
     }
 
-    public static Location getLocationDécalée(int count){
-        int x_décalé=50*count;
-        return new Location(Logique.lobbySpawn.getWorld(),x_décalé,Logique.lobbySpawn.getY(),Logique.lobbySpawn.getZ());
+    public static Location getLocationDecalee(int count){
+        int x_decale=decalage*count;
+        return new Location(Logique.lobbySpawn.getWorld(),x_decale,Logique.lobbySpawn.getY(),Logique.lobbySpawn.getZ());
     }
 
     public void checkGameStart(Lobby lobby){
@@ -157,7 +159,7 @@ public class Logique {
     public static void startGame(Session session){
         for (LobbyPlayer lobbyPlayers: session.getPlayers()){
             Player joueur = lobbyPlayers.getPlayer();
-            joueur.teleport(getLocationDécalée(session.getSessionId()));
+            joueur.teleport(getLocationDecalee(session.getSessionId()));
             joueur.sendMessage(ChatColor.LIGHT_PURPLE+"La partie est commencée!");
             joueur.sendTitle("", ChatColor.GOLD+"Partie commencée!", 10, 60, 20);
             joueur.closeInventory();

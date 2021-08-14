@@ -95,6 +95,15 @@ public class Events extends EventLogique implements Listener{
         }
     }
 
+    @EventHandler
+    public void onPlayerChat(HangingBreakByEntityEvent event) {
+        if (event.getRemover() instanceof Player){
+            if (isInLobby((Player) event.getRemover())){
+                event.setCancelled(false);
+            }
+        }
+    }
+
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {

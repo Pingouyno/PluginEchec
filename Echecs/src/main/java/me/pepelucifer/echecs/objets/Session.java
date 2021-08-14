@@ -1,6 +1,5 @@
 package me.pepelucifer.echecs.objets;
 import me.pepelucifer.echecs.logique.Logique;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.scoreboard.Scoreboard;
 
