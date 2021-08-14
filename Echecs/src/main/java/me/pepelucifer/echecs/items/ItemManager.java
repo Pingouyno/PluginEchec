@@ -10,9 +10,11 @@ import java.util.List;
 
 public class ItemManager {
     public static ItemStack chessPiece;
+    public static ItemStack porteQuitter;
 
     public static void init(){
         createChessPiece();
+        createPorteQuitter();
     }
 
     public static void createChessPiece(){
@@ -29,5 +31,14 @@ public class ItemManager {
         meta.setLore(lore);
         item.setItemMeta(meta);
         chessPiece=item;
+    }
+
+    public static void createPorteQuitter(){
+        ItemStack item = new ItemStack(Material.OAK_DOOR,1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD+"Quitter");
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        item.setItemMeta(meta);
+        porteQuitter=item;
     }
 }
