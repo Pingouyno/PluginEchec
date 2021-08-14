@@ -7,7 +7,6 @@ public class LobbyPlayer{
     boolean isPlaying;
     boolean isWhite;
     int timeLeft;
-    int sessionId;
 
     public LobbyPlayer(Player player) {
         this.player = (player);
@@ -27,7 +26,7 @@ public class LobbyPlayer{
     }
 
     public int getSessionId(){
-        return sessionId;
+        return getSession().getSessionId();
     }
 
     public String getName(){

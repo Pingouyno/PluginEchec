@@ -19,7 +19,7 @@ public class Session{
         this.players = new ArrayList<LobbyPlayer>();
         players.add(p1);
         players.add(p2);
-        this.started = false;
+        this.started = true;
         this.lobby=Logique.lobby;
     }
 
@@ -47,19 +47,12 @@ public class Session{
         return lobby;
     }
 
-    public void endSession(){
-        for (LobbyPlayer player:players){
-            players.remove(player);
-            getLobby().disconnectPlayer(player);
-            player.getPlayer().sendMessage(ChatColor.RED+"La partie est terminée.");
-        }
-        getLobby().getSessions().remove(this);
+    public boolean isStarted(){
+        return started;
     }
 
-    public void checkSessionEnd(){
-        if (players.size()!=2){
-           endSession();
-        }
+    public ArrayList<LobbyPlayer> getPlayers(){
+        return players;
     }
 }
 

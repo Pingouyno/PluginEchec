@@ -9,8 +9,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import sun.rmi.runtime.Log;
 
-public class Commands implements CommandExecutor {
+public class Commands extends Logique implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -27,9 +28,9 @@ public class Commands implements CommandExecutor {
 
     public void executeCommand(String cmd, Player player){
         if (cmd.equals("echecs")){
-            Logique.lobby.checkValidConnect(player);
+            checkValidConnect(player);
         }else if (cmd.equals("quitter")){
-            Logique.lobby.checkValidDisconnect(player);
+            checkValidDisconnect(player);
         }
     }
 }
