@@ -3,6 +3,7 @@ import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.chesslib.Board;
 import org.bukkit.World;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 
 import java.util.ArrayList;
 
@@ -23,6 +24,17 @@ public class Session{
         this.started = true;
         this.lobby=Logique.lobby;
         this.board = new Board();
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerChat(HangingBreakByEntityEvent event) {
+        if (event.getRemover() instanceof Player){
+            if(players.get(0) == ((Player) event.getRemover()) or players.get(1) == ((Player) event.getRemover())){
+                String[] coup = event.getMessage().split(" ")
+                System.out.println("Départ du coup : " + coup[0]);
+                System.out.println("Arrivée du coup : " + coup[1]);
+            }
+        }
     }
 
     public int getSessionId(){
