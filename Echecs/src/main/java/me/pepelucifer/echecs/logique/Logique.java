@@ -1,5 +1,7 @@
 package me.pepelucifer.echecs.logique;
 
+import me.pepelucifer.echecs.chesslib.Board;
+import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.objets.Lobby;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
