@@ -14,7 +14,7 @@ public class Session{
     boolean started;
     Scoreboard board;
     World world;
-    Board board;
+    Board echiquier;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -23,14 +23,14 @@ public class Session{
         players.add(p2);
         this.started = true;
         this.lobby=Logique.lobby;
-        this.board = new Board();
+        this.echiquier = new Board();
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerChat(HangingBreakByEntityEvent event) {
         if (event.getRemover() instanceof Player){
-            if(players.get(0) == ((Player) event.getRemover()) or players.get(1) == ((Player) event.getRemover())){
-                String[] coup = event.getMessage().split(" ")
+            if((players.get(0) == event.getRemover()) or (players.get(1) == event.getRemover())){
+                String[] coup = event.getMessage().split(" ");
                 System.out.println("Départ du coup : " + coup[0]);
                 System.out.println("Arrivée du coup : " + coup[1]);
             }
