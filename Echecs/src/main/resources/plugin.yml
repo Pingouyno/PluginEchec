@@ -1,4 +1,4 @@
-name: PluginEchec
+name: Echecs
 version: 1.0
 main: me.pepelucifer.echecs.Echecs
 api-version: 1.16

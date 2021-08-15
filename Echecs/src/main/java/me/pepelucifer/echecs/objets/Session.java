@@ -15,7 +15,7 @@ public class Session{
     Scoreboard board;
     World world;
     Board echiquier;
-    public Boolean aQuiDeJouer;
+    public Boolean auxBlancsAJouer;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -25,30 +25,15 @@ public class Session{
         this.started = true;
         this.lobby=Logique.lobby;
         this.echiquier = new Board();
-        this.aQuiDeJouer = true;
+        this.auxBlancsAJouer = true;
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPlayerChat (AsyncPlayerChatEvent event){
-        if (isInLobby(event.getPlayer())){
-            event.setCancelled(true);
-            LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
-            if(lobbyPlayer.isPlaying()){
-                Session session = lobbyPlayer.getSession();
-                String[] coup = event.getMessage().split(" ");
-                if(session.aQuiDeJouer && player.isWhite){
-                    System.out.println("Les blancs jouent :");
-                    System.out.println("Départ du coup : " + coup[0]);
-                    System.out.println("Arrivée du coup : " + coup[1]);
-                }else if(!session.aQuiDeJouer && !player.isWhite){
-                    System.out.println("Les noirs jouent :");
-                    System.out.println("Départ du coup : " + coup[0]);
-                    System.out.println("Arrivée du coup : " + coup[1]);
-                }
-            }
-            
+    public boolean isTraitAuxBlancs(){
+        return auxBlancsAJouer;
+    }
 
-        }
+    public void setTraitAuxBlancs(boolean trait){
+        auxBlancsAJouer=trait;
     }
 
     public int getSessionId(){
@@ -83,4 +68,3 @@ public class Session{
         return players;
     }
 }
-

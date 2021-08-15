@@ -13,6 +13,8 @@ import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Logique {
 
     public static Location lobbySpawn;
