@@ -5,12 +5,14 @@ public class LobbyPlayer{
     Player player;
     Session session;
     boolean isPlaying;
-    boolean isWhite;
+    public boolean isWhite;
     int timeLeft;
 
     public LobbyPlayer(Player player) {
         this.player = (player);
         this.isPlaying=false;
+        this.isWhite=false;
+        this.timeLeft=600;
     }
 
     public Session getSession(){

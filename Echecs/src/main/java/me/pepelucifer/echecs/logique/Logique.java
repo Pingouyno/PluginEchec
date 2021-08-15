@@ -159,6 +159,8 @@ public class Logique {
 
 
     public static void startGame(Session session){
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 1);
+        session.getPlayers().get(randomNum).isWhite = true;
         for (LobbyPlayer lobbyPlayers: session.getPlayers()){
             Player joueur = lobbyPlayers.getPlayer();
             joueur.teleport(getLocationDecalee(session.getSessionId()));

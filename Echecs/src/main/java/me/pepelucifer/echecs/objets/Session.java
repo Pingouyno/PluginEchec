@@ -15,6 +15,7 @@ public class Session{
     Scoreboard board;
     World world;
     Board echiquier;
+    public Boolean aQuiDeJouer;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -24,16 +25,29 @@ public class Session{
         this.started = true;
         this.lobby=Logique.lobby;
         this.echiquier = new Board();
+        this.aQuiDeJouer = true;
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPlayerChat(HangingBreakByEntityEvent event) {
-        if (event.getRemover() instanceof Player){
-            if((players.get(0) == event.getRemover()) or (players.get(1) == event.getRemover())){
+    public void onPlayerChat (AsyncPlayerChatEvent event){
+        if (isInLobby(event.getPlayer())){
+            event.setCancelled(true);
+            LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
+            if(lobbyPlayer.isPlaying()){
+                Session session = lobbyPlayer.getSession();
                 String[] coup = event.getMessage().split(" ");
-                System.out.println("Départ du coup : " + coup[0]);
-                System.out.println("Arrivée du coup : " + coup[1]);
+                if(session.aQuiDeJouer && player.isWhite){
+                    System.out.println("Les blancs jouent :");
+                    System.out.println("Départ du coup : " + coup[0]);
+                    System.out.println("Arrivée du coup : " + coup[1]);
+                }else if(!session.aQuiDeJouer && !player.isWhite){
+                    System.out.println("Les noirs jouent :");
+                    System.out.println("Départ du coup : " + coup[0]);
+                    System.out.println("Arrivée du coup : " + coup[1]);
+                }
             }
+            
+
         }
     }
 
