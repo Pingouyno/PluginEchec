@@ -163,8 +163,6 @@ public class Board implements Cloneable, BoardEvent {
      * @return true if operation was successful
      */
     public boolean doMove(final Move move, boolean fullValidation) {
-        Bukkit.broadcastMessage("validation : "+fullValidation);
-
         if (fullValidation){                                                                                                                        //ENLEVER LA PREMIÈRE BOUCLE IF
             if (!isMoveLegal(move, fullValidation)){
                 return false;

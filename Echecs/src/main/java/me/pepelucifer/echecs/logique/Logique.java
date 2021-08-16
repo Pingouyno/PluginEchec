@@ -28,6 +28,8 @@ public class Logique {
     public static Lobby lobby;
     public static int decalage;
 
+    public static Location premiereCaseUniverselleBlanc;
+    public static Location premiereCaseUniverselleNoir;
     public static boolean isEnModeDeveloppement;
     public static Board devBoard;
     public static boolean devBoardTraitAuxBlancs;
@@ -41,6 +43,8 @@ public class Logique {
         spawnWorldName=spawnWorld.getName();
         chessWorldName=chessWorld.getName();
         isEnModeDeveloppement=false;
+        premiereCaseUniverselleBlanc = new Location(chessWorld,106,94,294);
+        premiereCaseUniverselleNoir = new Location(chessWorld,106,94,305);
 
         lobby = new Lobby();
         decalage = 14;
@@ -204,9 +208,9 @@ public class Logique {
         }
     }
 
-    public static Location getSessionLocationDecalee(int count){
-        double x_decale=sessionSpawn.getX()+(decalage*count);
-        return new Location(chessWorld,x_decale,sessionSpawn.getY(),sessionSpawn.getZ());
+    public static Location getLocationDecalee(int count, Location location){
+        double x_decale=location.getX()+(decalage*count);
+        return new Location(location.getWorld(),x_decale,location.getY(),location.getZ());
     }
 
     public void checkGameStart(Lobby lobby){                                                                                            //ON DOIT CHANGER CA POUR UN MATCHMAKING FONCTIONNEL
@@ -216,8 +220,18 @@ public class Logique {
     }
 
     public static void checkGameEnd(Session session){
-        if (session.isStarted() && session.getPlayerCount()==1){                                                                                       //Changer éventuellement le fonctionnement
-            lobby.endSession(session);
+        if (session.isStarted() && !session.isLocked()){                                                                                       //Changer éventuellement le fonctionnement
+            if (isGameOver(session)){
+                lobby.endSession(session);
+            }
+        }
+    }
+
+    public static boolean isGameOver(Session session){
+        if (session.getPlayerCount()==1  ||  session.getEchiquier().isDraw() || session.getEchiquier().isMated()){
+            return true;
+        }else{
+            return false;
         }
     }
 
@@ -228,7 +242,7 @@ public class Logique {
         for (LobbyPlayer lobbyPlayers: session.getPlayers()){
             Player joueur = lobbyPlayers.getPlayer();
             lobbyPlayers.isPlaying=true;
-            joueur.teleport(getSessionLocationDecalee(session.getSessionId()));
+            joueur.teleport(getLocationDecalee(session.getSessionId(),sessionSpawn));
             joueur.sendMessage(ChatColor.LIGHT_PURPLE+"La partie est commencée!\n\n"+ChatColor.WHITE+"Vous avez les "+getColorMessage(lobbyPlayers));
             joueur.sendTitle("", ChatColor.GOLD+"Partie commencée!", 10, 60, 20);
             joueur.closeInventory();
@@ -236,13 +250,16 @@ public class Logique {
             joueur.setFoodLevel(20);
             joueur.getInventory().remove(ItemManager.chessMenuButton);
             joueur.getInventory().setHeldItemSlot(0);
+            session.drawBoards();
         }
     }
 
     public static void endGame(Session session){
-        for (LobbyPlayer player: session.getPlayers()){
-            player.getPlayer().sendMessage(ChatColor.RED+"La partie est terminée.");
-            disconnectPlayer(player);
+        session.locked=true;
+        for (int i=0;i<session.getPlayerCount();i++){
+            LobbyPlayer lobbyPlayer = session.getPlayers().get(0);
+            lobbyPlayer.getPlayer().sendMessage(ChatColor.RED+"La partie est terminée.");
+            disconnectPlayer(lobbyPlayer);
         }
     }
 

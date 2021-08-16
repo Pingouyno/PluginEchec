@@ -6,6 +6,7 @@ import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,6 +20,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Events extends EventLogique implements Listener{
 
@@ -47,7 +49,21 @@ public class Events extends EventLogique implements Listener{
                 Session session = lobbyPlayer.getSession();
                 if(session.isTraitAuxBlancs() == (lobbyPlayer.isWhite())) {
                     String coup = event.getMessage();
-                    session.jouer(coup);
+
+                    new BukkitRunnable() {                                                //boucle pour rendre le reste du code synchrone, on va changer la manière de jouer les coups dans le futur donc ce n'est pas un problème
+                        int time=1;
+                        public void run() {
+                            if (time==0){
+                                session.jouer(coup);
+                                cancel();
+                                return;
+                            }
+                            time--;
+                        }
+                    }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 1L, 2L);
+
+
+                    //session.jouer(coup);
                 }else{
                     event.getPlayer().sendMessage(ChatColor.RED+"Ce n'est pas votre tour!");
                 }
