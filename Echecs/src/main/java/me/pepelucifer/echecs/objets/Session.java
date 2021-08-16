@@ -1,6 +1,10 @@
 package me.pepelucifer.echecs.objets;
+import me.pepelucifer.echecs.chesslib.Side;
+import me.pepelucifer.echecs.chesslib.Square;
+import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.chesslib.Board;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -12,10 +16,9 @@ public class Session{
     int id;
     ArrayList<LobbyPlayer> players;
     boolean started;
-    Scoreboard board;
     World world;
     Board echiquier;
-    public Boolean auxBlancsAJouer;
+    Boolean auxBlancsAJouer;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -44,20 +47,20 @@ public class Session{
         return world;
     }
 
-    public Scoreboard getScoreBoard() {
-        return board;
+    public Board getEchiquier(){
+        return this.echiquier;
     }
 
     public int getPlayerCount(){
         return players.size();
     }
 
-    public void setScoreBoard(Scoreboard scoreboard){
-        this.board=scoreboard;
-    }
-
     public Lobby getLobby(){
         return lobby;
+    }
+
+    public void inverserTrait(){
+        setTraitAuxBlancs(!isTraitAuxBlancs());
     }
 
     public boolean isStarted(){
@@ -66,5 +69,15 @@ public class Session{
 
     public ArrayList<LobbyPlayer> getPlayers(){
         return players;
+    }
+
+    public void jouer(String arrivee, String depart){
+        Move move;
+        if (isTraitAuxBlancs()){
+            move = new Move(arrivee+depart,Side.WHITE);
+        }else{
+            move = new Move(arrivee+depart,Side.BLACK);
+        }
+        echiquier.doMove(move);
     }
 }

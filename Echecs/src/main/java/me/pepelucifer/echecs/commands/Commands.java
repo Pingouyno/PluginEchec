@@ -4,6 +4,7 @@ package me.pepelucifer.echecs.commands;
 import me.pepelucifer.echecs.Echecs;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,6 +32,9 @@ public class Commands extends Logique implements CommandExecutor {
             checkValidConnect(player);
         }else if (cmd.equals("quitter")){
             checkValidDisconnect(player);
+        }else if (cmd.equals("dev")){
+            Bukkit.broadcastMessage("§2Mode développement activé.");
+            Logique.isEnModeDeveloppement=true;
         }
     }
 }

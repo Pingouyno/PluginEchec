@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 public class LobbyPlayer{
     Player player;
     Session session;
-    boolean isPlaying;
+    public boolean isPlaying;
     public boolean isWhite;
     int timeLeft;
 
@@ -14,6 +14,8 @@ public class LobbyPlayer{
         this.isWhite=false;
         this.timeLeft=600;
     }
+
+    public void setSession(Session session){this.session=session;}
 
     public Session getSession(){
         return session;
@@ -38,6 +40,8 @@ public class LobbyPlayer{
     public boolean isPlaying(){
         return isPlaying;
     }
+
+    public boolean isInSession() { return (getSession()!=null);}
 
     public Player getPlayer(){
         return player;

@@ -46,10 +46,11 @@ public final class Lobby{
         return spawn;
     }
 
-    public void startSession(){
-        Session session = new Session(count, waitingPlayerList.get(0),waitingPlayerList.get(1));
+    public void startSession(LobbyPlayer player1, LobbyPlayer player2){
+        Session session = new Session(count, player1,player2);
         sessionList.add(session);
         for (LobbyPlayer joueurs: session.players){
+            joueurs.setSession(session);
             waitingPlayerList.remove(joueurs);
             playingPlayerList.add(joueurs);
         }

@@ -13,3 +13,7 @@ commands:
     description: Quitter un salon d'échecs
     usage: /<command>
     aliases: q
+  dev:
+    description: Propriétés spéciales pour développement
+    usage: /<command>
+    aliases: d

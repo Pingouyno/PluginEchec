@@ -1,6 +1,6 @@
 package me.pepelucifer.echecs.logique;
-
 import me.pepelucifer.echecs.chesslib.Board;
+import me.pepelucifer.echecs.chesslib.Side;
 import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.objets.Lobby;
@@ -17,16 +17,75 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Logique {
 
-    public static Location lobbySpawn;
     public static World chessWorld;
+    public static World spawnWorld;
+    public static Location lobbySpawn;
+    public static Location worldSpawn;
+    public static Location sessionSpawn;
+    public static String chessWorldName;
+    public static String spawnWorldName;
+
     public static Lobby lobby;
     public static int decalage;
 
+    public static boolean isEnModeDeveloppement;
+    public static Board devBoard;
+    public static boolean devBoardTraitAuxBlancs;
+
     public static void init(){
-        lobbySpawn = new Location(Bukkit.getWorlds().get(0),-210.5,91,-371.5);
         chessWorld = Bukkit.getWorlds().get(0);
+        spawnWorld = Bukkit.getWorlds().get(0);
+        lobbySpawn = new Location(chessWorld,86.5,86.5,303);
+        worldSpawn = spawnWorld.getSpawnLocation();
+        sessionSpawn = new Location(chessWorld,101.5,86.5,303.5);
+        spawnWorldName=spawnWorld.getName();
+        chessWorldName=chessWorld.getName();
+        isEnModeDeveloppement=false;
+
         lobby = new Lobby();
-        decalage = 50;
+        decalage = 14;
+
+        devBoard=new Board();
+        devBoardTraitAuxBlancs=true;
+    }
+
+
+    public static void devJouerCoup(String arrivee, String depart){
+        Move move;
+        if (devBoardTraitAuxBlancs){
+            move = new Move(arrivee+depart, Side.WHITE);
+        }else{
+            move = new Move(arrivee+depart,Side.BLACK);
+        }
+        if (isCoupCompletementCalissementValide(move)){
+            devBoard.doMove(move);
+            devBoardTraitAuxBlancs=!devBoardTraitAuxBlancs;
+        }
+
+    }
+
+    public static boolean isCoupCompletementCalissementValide(Move move){
+        Bukkit.broadcastMessage("\n|\n|\n|\n|\n|\n|\n|\n|COUPS LÉGAUX : "+devBoard.legalMoves().toString()+
+                "\n|");
+        Bukkit.broadcastMessage(devBoard.toString());
+
+        int cpt=0;
+        if (devBoard.legalMoves().contains(move)){
+            Bukkit.broadcastMessage("\n§aListe coups légaux contient votre coup");
+            cpt++;
+        }
+        if (devBoard.isMoveLegal(move,true)){
+            Bukkit.broadcastMessage("§aMéthode vérification contient votre coup");
+            cpt++;
+        }
+        if (cpt==2){
+            Bukkit.broadcastMessage("§aCoup complètement valide!");
+            devBoard.doMove(move);
+            return true;
+        }else{
+            Bukkit.broadcastMessage("§4Coup invalide ; non joué dans le board virtuel");
+        }
+        return false;
     }
 
 
@@ -121,16 +180,18 @@ public class Logique {
     }
 
     public void connectPlayer(Player player){
-        player.teleport(Logique.lobby.getSpawnLocation());
+        player.teleport(lobbySpawn);
         player.sendMessage(ChatColor.LIGHT_PURPLE+"Bienvenue dans le salon d'échecs!");
         player.getInventory().setItem(8,ItemManager.porteQuitter);
+        player.getInventory().setItem(0,ItemManager.chessMenuButton);
         lobby.getWaitingPlayers().add(new LobbyPlayer(player));
         checkGameStart(lobby);
     }
 
     public static void disconnectPlayer(LobbyPlayer lobbyPlayer){
-        lobbyPlayer.getPlayer().teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+        lobbyPlayer.getPlayer().teleport(worldSpawn);
         lobbyPlayer.getPlayer().getInventory().removeItem(ItemManager.porteQuitter);
+        lobbyPlayer.getPlayer().getInventory().removeItem(ItemManager.chessMenuButton);
         if (lobbyPlayer.isPlaying()){
             lobby.getPlayingPlayers().remove(lobbyPlayer);
             lobbyPlayer.getSession().getPlayers().remove(lobbyPlayer);
@@ -142,14 +203,14 @@ public class Logique {
         }
     }
 
-    public static Location getLocationDecalee(int count){
-        int x_decale=decalage*count;
-        return new Location(Logique.lobbySpawn.getWorld(),x_decale,Logique.lobbySpawn.getY(),Logique.lobbySpawn.getZ());
+    public static Location getSessionLocationDecalee(int count){
+        double x_decale=sessionSpawn.getX()+(decalage*count);
+        return new Location(chessWorld,x_decale,sessionSpawn.getY(),sessionSpawn.getZ());
     }
 
-    public void checkGameStart(Lobby lobby){
+    public void checkGameStart(Lobby lobby){                                                                                            //ON DOIT CHANGER CA POUR UN MATCHMAKING FONCTIONNEL
         if (lobby.getWaitingPlayers().size()>=2){
-            lobby.startSession();
+            //lobby.startSession();
         }
     }
 
@@ -161,16 +222,18 @@ public class Logique {
 
 
     public static void startGame(Session session){
-        int randomNum = ThreadLocalRandom.current().nextInt(0, 1);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
         session.getPlayers().get(randomNum).isWhite = true;
         for (LobbyPlayer lobbyPlayers: session.getPlayers()){
             Player joueur = lobbyPlayers.getPlayer();
-            joueur.teleport(getLocationDecalee(session.getSessionId()));
-            joueur.sendMessage(ChatColor.LIGHT_PURPLE+"La partie est commencée!");
+            lobbyPlayers.isPlaying=true;
+            joueur.teleport(getSessionLocationDecalee(session.getSessionId()));
+            joueur.sendMessage(ChatColor.LIGHT_PURPLE+"La partie est commencée!\n\n"+ChatColor.WHITE+"Vous avez les "+getColorMessage(lobbyPlayers));
             joueur.sendTitle("", ChatColor.GOLD+"Partie commencée!", 10, 60, 20);
             joueur.closeInventory();
             joueur.setHealth(20.0);
             joueur.setFoodLevel(20);
+            joueur.getInventory().remove(ItemManager.chessMenuButton);
             joueur.getInventory().setHeldItemSlot(0);
         }
     }
@@ -179,6 +242,15 @@ public class Logique {
         for (LobbyPlayer player: session.getPlayers()){
             player.getPlayer().sendMessage(ChatColor.RED+"La partie est terminée.");
             disconnectPlayer(player);
+        }
+    }
+
+
+    public static String getColorMessage(LobbyPlayer lobbyPlayer){
+        if (lobbyPlayer.isWhite()){
+            return (ChatColor.GOLD+"blancs");
+        }else{
+            return (ChatColor.GOLD+"noirs");
         }
     }
 }
