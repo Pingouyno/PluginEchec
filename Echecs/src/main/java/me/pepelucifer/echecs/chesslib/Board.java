@@ -21,6 +21,7 @@ import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.chesslib.move.MoveGenerator;
 import me.pepelucifer.echecs.chesslib.move.MoveList;
 import me.pepelucifer.echecs.chesslib.util.XorShiftRandom;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -162,9 +163,12 @@ public class Board implements Cloneable, BoardEvent {
      * @return true if operation was successful
      */
     public boolean doMove(final Move move, boolean fullValidation) {
+        Bukkit.broadcastMessage("validation : "+fullValidation);
 
-        if (!isMoveLegal(move, fullValidation)) {
-            return false;
+        if (fullValidation){                                                                                                                        //ENLEVER LA PREMIÈRE BOUCLE IF
+            if (!isMoveLegal(move, fullValidation)){
+                return false;
+            }
         }
 
         Piece movingPiece = getPiece(move.getFrom());

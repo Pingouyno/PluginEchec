@@ -5,6 +5,8 @@ import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.chesslib.Board;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -71,13 +73,37 @@ public class Session{
         return players;
     }
 
-    public void jouer(String arrivee, String depart){
+    public void jouer(String coup){
+
         Move move;
         if (isTraitAuxBlancs()){
-            move = new Move(arrivee+depart,Side.WHITE);
+            move = new Move(coup,Side.WHITE);
         }else{
-            move = new Move(arrivee+depart,Side.BLACK);
+            move = new Move(coup,Side.BLACK);
         }
-        echiquier.doMove(move);
+        if (isCoupLegal(move)){
+            echiquier.doMove(move);
+            inverserTrait();
+            if (isTraitAuxBlancs()){
+                Bukkit.broadcastMessage("Les blancs jouent :");
+            }else{
+                Bukkit.broadcastMessage("Les noirs jouent :");
+            }
+            Bukkit.broadcastMessage("Depart du coup : " + move.getFrom());
+            Bukkit.broadcastMessage("Arrivee du coup : " + move.getTo());
+        }else{
+            messageJoueurs(ChatColor.RED+"Coup invalide!");
+        }
+        Bukkit.broadcastMessage("\n"+getEchiquier().toString());
+    }
+
+    public boolean isCoupLegal(Move move){
+        return (getEchiquier().legalMoves().contains(move));
+    }
+
+    public void messageJoueurs(String msg){
+        for (LobbyPlayer people:getPlayers()){
+            people.getPlayer().sendMessage(msg);
+        }
     }
 }

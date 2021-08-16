@@ -33,8 +33,12 @@ public class Commands extends Logique implements CommandExecutor {
         }else if (cmd.equals("quitter")){
             checkValidDisconnect(player);
         }else if (cmd.equals("dev")){
-            Bukkit.broadcastMessage("§2Mode développement activé.");
-            Logique.isEnModeDeveloppement=true;
+            Logique.isEnModeDeveloppement=!isEnModeDeveloppement;
+            if (isEnModeDeveloppement){
+                Bukkit.broadcastMessage("§2Mode développement activé.");
+            }else{
+                Bukkit.broadcastMessage("§4Mode développement désactivé.");
+            }
         }
     }
 }

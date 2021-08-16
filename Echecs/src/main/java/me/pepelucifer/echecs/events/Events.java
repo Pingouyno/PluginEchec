@@ -45,25 +45,16 @@ public class Events extends EventLogique implements Listener{
             LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
             if(lobbyPlayer.isPlaying()){
                 Session session = lobbyPlayer.getSession();
-                String[] coup = event.getMessage().split(" ");
                 if(session.isTraitAuxBlancs() == (lobbyPlayer.isWhite())) {
-                    session.jouer(coup[0],coup[1]);
-                    session.inverserTrait();
-                    if (lobbyPlayer.isWhite()){
-                        Bukkit.broadcastMessage("Les blancs jouent :");
-                    }else{
-                        Bukkit.broadcastMessage("Les noirs jouent :");
-                    }
-                    Bukkit.broadcastMessage("Depart du coup : " + coup[0]);
-                    Bukkit.broadcastMessage("Arrivee du coup : " + coup[1]);
-                    Bukkit.broadcastMessage("\n"+session.getEchiquier().toString());
+                    String coup = event.getMessage();
+                    session.jouer(coup);
                 }else{
                     event.getPlayer().sendMessage(ChatColor.RED+"Ce n'est pas votre tour!");
                 }
             }
         }else if (Logique.isEnModeDeveloppement){
-            String[] coup = event.getMessage().split(" ");
-            Logique.devJouerCoup(coup[0],coup[1]);
+            String coup = event.getMessage();
+            Logique.devJouerCoup(coup);
         }
     }
 

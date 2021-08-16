@@ -50,16 +50,18 @@ public class Logique {
     }
 
 
-    public static void devJouerCoup(String arrivee, String depart){
+    public static void devJouerCoup(String coup){
         Move move;
+
         if (devBoardTraitAuxBlancs){
-            move = new Move(arrivee+depart, Side.WHITE);
+            move = new Move(coup, Side.WHITE);
         }else{
-            move = new Move(arrivee+depart,Side.BLACK);
+            move = new Move(coup,Side.BLACK);
         }
         if (isCoupCompletementCalissementValide(move)){
-            devBoard.doMove(move);
+            devBoard.doMove(move,false);
             devBoardTraitAuxBlancs=!devBoardTraitAuxBlancs;
+            Bukkit.broadcastMessage(devBoard.toString());
         }
 
     }
@@ -67,20 +69,19 @@ public class Logique {
     public static boolean isCoupCompletementCalissementValide(Move move){
         Bukkit.broadcastMessage("\n|\n|\n|\n|\n|\n|\n|\n|COUPS LÉGAUX : "+devBoard.legalMoves().toString()+
                 "\n|");
-        Bukkit.broadcastMessage(devBoard.toString());
 
         int cpt=0;
         if (devBoard.legalMoves().contains(move)){
             Bukkit.broadcastMessage("\n§aListe coups légaux contient votre coup");
             cpt++;
         }
+        /*
         if (devBoard.isMoveLegal(move,true)){
             Bukkit.broadcastMessage("§aMéthode vérification contient votre coup");
             cpt++;
-        }
-        if (cpt==2){
+        }*/
+        if (cpt==1){
             Bukkit.broadcastMessage("§aCoup complètement valide!");
-            devBoard.doMove(move);
             return true;
         }else{
             Bukkit.broadcastMessage("§4Coup invalide ; non joué dans le board virtuel");
