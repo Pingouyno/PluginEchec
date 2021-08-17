@@ -13,6 +13,7 @@ public final class Echecs extends JavaPlugin {
     @Override
     public void onEnable() {
         Logique.init();
+        Logique.pluginFolder=this.getDataFolder().getAbsolutePath();
         getServer().getPluginManager().registerEvents(new Events(),this);
         getCommand("echecs").setExecutor(new Commands());
         getCommand("quitter").setExecutor(new Commands());

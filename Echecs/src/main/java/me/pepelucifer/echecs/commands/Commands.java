@@ -2,6 +2,7 @@ package me.pepelucifer.echecs.commands;
 
 
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;

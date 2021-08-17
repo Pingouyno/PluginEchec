@@ -33,6 +33,7 @@ public class Logique {
     public static boolean isEnModeDeveloppement;
     public static Board devBoard;
     public static boolean devBoardTraitAuxBlancs;
+    public static String pluginFolder;
 
     public static void init(){
         chessWorld = Bukkit.getWorlds().get(0);
@@ -48,7 +49,6 @@ public class Logique {
 
         lobby = new Lobby();
         decalage = 14;
-
         devBoard=new Board();
         devBoardTraitAuxBlancs=true;
     }

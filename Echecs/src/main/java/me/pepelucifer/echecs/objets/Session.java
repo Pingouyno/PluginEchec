@@ -8,6 +8,8 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.map.MapCanvas;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 
@@ -93,6 +95,14 @@ public class Session{
         }
     }
 
+    public LobbyPlayer getPlayer(boolean getWhite){
+        if (getWhite){
+            return getWhite();
+        }else{
+            return getBlack();
+        }
+    }
+
     public LobbyPlayer getWhite(){
         if (getPlayers().get(0).isWhite()){
             return getPlayers().get(0);
@@ -127,7 +137,7 @@ public class Session{
             Bukkit.broadcastMessage("Depart du coup : " + move.getFrom());
             Bukkit.broadcastMessage("Arrivee du coup : " + move.getTo());
         }else{
-            messageJoueurs(ChatColor.RED+"Coup invalide!");
+            getPlayer(isTraitAuxBlancs()).getPlayer().sendMessage(ChatColor.RED+"Coup invalide!");
         }
         drawBoards();
     }
@@ -173,7 +183,6 @@ public class Session{
 
 
                 switch (Character.toLowerCase(c)) {
-
                     case 'p':
                         piece="Pion ";
                         break;
@@ -195,11 +204,10 @@ public class Session{
                     case '.':
                         isPiece=false;
                         break;
-
                 }
                 if (isPiece){
                     Block block=getWorld().getBlockAt(caseCourante);
-                    getWorld().getBlockAt(caseCourante).setType(Material.OAK_WALL_SIGN);
+                    block.setType(Material.OAK_WALL_SIGN);
                     Sign panneau = (Sign) block.getState();
                     panneau.setLine(1, piece+couleur);
                     org.bukkit.material.Sign matSign =  new org.bukkit.material.Sign(Material.OAK_WALL_SIGN);
@@ -209,7 +217,6 @@ public class Session{
                 }else{
                     getWorld().getBlockAt(caseCourante).setType(Material.AIR);
                 }
-
                 cpt++;
                 decalerCase(caseCourante,cpt);
             }
