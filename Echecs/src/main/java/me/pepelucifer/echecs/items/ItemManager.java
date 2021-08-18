@@ -1,4 +1,6 @@
 package me.pepelucifer.echecs.items;
+import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.custommaps.TraceurImage;
 import me.pepelucifer.echecs.logique.Logique;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -8,13 +10,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.map.MapCanvas;
-import org.bukkit.map.MapRenderer;
-import org.bukkit.map.MapView;
-import org.bukkit.map.MinecraftFont;
+import org.bukkit.map.*;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,12 +27,15 @@ public class ItemManager {
     public static ItemStack porteQuitter;
     public static ItemStack chessEmptySlot;
     public static ItemStack chessMenuButton;
+    public static ItemStack customMapBlanc;
+    public static ItemStack customMapNoir;
 
     public static void init(){
         createChessPiece();
         createPorteQuitter();
         createChessEmptySlotItem();
         createChessMenuButton();
+        createCustomMaps();
     }
 
     private static void createChessPiece(){
@@ -89,5 +93,27 @@ public class ItemManager {
         meta.setLocalizedName("chess_2");
         item.setItemMeta(meta);
         return item;
+    }
+
+
+    private static void createCustomMaps(){
+        customMapBlanc=getCustomMap("test",true,false);
+        customMapNoir=getCustomMap("test",false,false);
+    }
+
+    public static ItemStack getCustomMap(String nomImage, Boolean isWhite, Boolean isCaseVide){
+        MapView view = Bukkit.createMap(Logique.chessWorld);
+        view.getRenderers().clear();
+        TraceurImage traceurImage = new TraceurImage(nomImage,isWhite,isCaseVide);
+        if (!traceurImage.load(nomImage)){
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Erreur dans le chargement de l'image ["+nomImage+"]");
+            return null;
+        }
+        view.addRenderer(traceurImage);
+        ItemStack map = new ItemStack(Material.FILLED_MAP);
+        MapMeta mapMeta = (MapMeta) map.getItemMeta();
+        mapMeta.setMapView(view);
+        map.setItemMeta(mapMeta);
+        return map;
     }
 }

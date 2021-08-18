@@ -256,11 +256,13 @@ public class Logique {
 
     public static void endGame(Session session){
         session.locked=true;
-        for (int i=0;i<session.getPlayerCount();i++){
+        int pCount=session.getPlayerCount();
+        for (int i=0;i<pCount;i++){
             LobbyPlayer lobbyPlayer = session.getPlayers().get(0);
             lobbyPlayer.getPlayer().sendMessage(ChatColor.RED+"La partie est terminée.");
             disconnectPlayer(lobbyPlayer);
         }
+        session.retirerCadres();
     }
 
 

@@ -1,15 +1,13 @@
 package me.pepelucifer.echecs.events;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import me.pepelucifer.echecs.chesslib.move.Move;
+import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.custommaps.TraceurImage;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,20 +17,23 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.server.MapInitializeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapCanvas;
+import org.bukkit.map.MapPalette;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Events extends EventLogique implements Listener{
 
@@ -82,49 +83,18 @@ public class Events extends EventLogique implements Listener{
             Logique.devJouerCoup(coup);
         }else{
             new BukkitRunnable() {                                                //boucle pour rendre le reste du code synchrone, oui oui je sais c'est DÉGUEULASSE
-                int time=1;
+                int time=0;
                 public void run() {
-                    if (time==0){
-                        getCustomMap(event.getPlayer());
+                    if (time==1){
+                        event.getPlayer().getInventory().setItem(0,ItemManager.getCustomMap("test",false,false));
                         cancel();
                         return;
                     }
-                    time--;
+                    time++;
                 }
-            }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 1L, 2L);
+            }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 1L, 20L);
         }
     }
-
-
-    public void getCustomMap(Player player){
-        MapView view = Bukkit.createMap(Logique.chessWorld);
-        for (MapRenderer m : view.getRenderers()) {
-            view.removeRenderer(m);
-        }
-        try {
-            view.addRenderer(new CMRenderer());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        player.sendMap(view);
-    }
-
-
-    public class CMRenderer extends MapRenderer
-    {
-        @Override
-        public void render(MapView map, MapCanvas canvas, Player p)
-        {
-            try{
-                BufferedImage img = ImageIO.read(new File(getClass().getResource("/test.jpg").toURI()));                     //  j'essaye avec "/" , "\",  "\\" et j'ai quasiment envie d'essayer avec "|"
-                canvas.drawImage(0,0,img);
-            } catch(Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event){
@@ -180,8 +150,8 @@ public class Events extends EventLogique implements Listener{
     @EventHandler
     public void onItemFrameBreak(HangingBreakByEntityEvent event) {
         if (event.getRemover() instanceof Player){
-            if (isInLobby((Player) event.getRemover())){
-                event.setCancelled(false);
+            if (isInLobby((Player) event.getEntity())){
+                event.setCancelled(true);
             }
         }
     }
@@ -190,7 +160,7 @@ public class Events extends EventLogique implements Listener{
     public void onEntityDamage(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player){
             if (isInLobby((Player) event.getDamager())){
-                event.setCancelled(false);
+                event.setCancelled(true);
             }
         }
     }

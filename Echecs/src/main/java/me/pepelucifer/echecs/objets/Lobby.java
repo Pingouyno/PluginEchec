@@ -63,6 +63,7 @@ public final class Lobby{
         for (LobbyPlayer player:session.getPlayers()){
             sessionList.remove(player);
         }
+        session.retirerCadres();
         getSessions().remove(this);
     }
 }

@@ -26,7 +26,7 @@ public final class Echecs extends JavaPlugin {
     public void onDisable() {
         getServer().getConsoleSender().sendMessage(ChatColor.RED+"echecs arrêté.");
         for (Session session:Logique.lobby.getSessions()){
-            Logique.endGame(session);
+            Logique.lobby.endSession(session);
         }
     }
 }

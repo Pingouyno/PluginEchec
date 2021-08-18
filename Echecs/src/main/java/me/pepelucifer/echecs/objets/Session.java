@@ -2,23 +2,30 @@ package me.pepelucifer.echecs.objets;
 import me.pepelucifer.echecs.chesslib.Side;
 import me.pepelucifer.echecs.chesslib.Square;
 import me.pepelucifer.echecs.chesslib.move.Move;
+import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.chesslib.Board;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 
 public class Session{
     Lobby lobby;
     int id;
+    UUID[] cadresUUIDsBlancs;
+    UUID[] cadresUUIDsNoirs;
     ArrayList<LobbyPlayer> players;
     boolean started;
     public boolean locked;
@@ -41,6 +48,9 @@ public class Session{
         this.premiereCaseNoir = Logique.getLocationDecalee(id,Logique.premiereCaseUniverselleNoir);
         this.world=Logique.chessWorld;
         this.locked=false;
+        this.cadresUUIDsBlancs=new UUID[64];
+        this.cadresUUIDsNoirs=new UUID[64];
+        initialiserCadres();
     }
 
     public boolean isTraitAuxBlancs(){
@@ -142,6 +152,7 @@ public class Session{
         drawBoards();
     }
 
+
     public void drawBoards(){
         drawBoardFromPerspective(true);
         drawBoardFromPerspective(false);
@@ -167,60 +178,110 @@ public class Session{
             echiq=echiquier.toStringFromBlackViewPoint().split("\n");
         }
         int cpt=0;
+        int i=0;
         char c;
+        boolean isCaseBlanc=false;
         for (String str:echiq){
             while (cpt<8){
+                isCaseBlanc=!isCaseBlanc;
                 c=str.charAt(cpt);
-                Boolean isUpper=(Character.isUpperCase(c));
+                Boolean isPieceBlanc=(Character.isUpperCase(c));
                 String couleur;
-                if (isUpper){
-                    couleur="blanc";
+                if (isPieceBlanc){
+                    couleur="_blanc";
                 }else{
-                    couleur="noir";
+                    couleur="_noir";
                 }
-                Boolean isPiece=true;
+                Boolean isCaseVide=false;
                 String piece="";
-
 
                 switch (Character.toLowerCase(c)) {
                     case 'p':
-                        piece="Pion ";
+                        piece="pion";
                         break;
                     case 'r':
-                        piece="Tour ";
+                        piece="tour";
                         break;
                     case 'n':
-                        piece="Cavalier ";
+                        piece="cavalier";
                         break;
                     case 'b':
-                        piece="Fou ";
+                        piece="fou";
                         break;
                     case 'q':
-                        piece="Dame ";
+                        piece="dame";
                         break;
                     case 'k':
-                        piece="Roi ";
+                        piece="roi";
                         break;
                     case '.':
-                        isPiece=false;
+                        isCaseVide=true;
                         break;
                 }
-                if (isPiece){
-                    Block block=getWorld().getBlockAt(caseCourante);
-                    block.setType(Material.OAK_WALL_SIGN);
-                    Sign panneau = (Sign) block.getState();
-                    panneau.setLine(1, piece+couleur);
-                    org.bukkit.material.Sign matSign =  new org.bukkit.material.Sign(Material.OAK_WALL_SIGN);
-                    matSign.setFacingDirection(BlockFace.WEST);
-                    panneau.setData(matSign);
-                    panneau.update(true);
+                Entity entity;
+                if (asWhite){
+                    entity = Bukkit.getEntity(cadresUUIDsBlancs[i]);
                 }else{
-                    getWorld().getBlockAt(caseCourante).setType(Material.AIR);
+                    entity = Bukkit.getEntity(cadresUUIDsNoirs[i]);
                 }
+                String nomFichier="test"/*+couleur*/;                                                                   //REMETTRE LA COULEUR
+                ItemStack map = ItemManager.getCustomMap(nomFichier,isCaseBlanc,isCaseVide);
+                ItemFrame cadre = (ItemFrame) entity;
+
+
+                cadre.setItem(map);
+                /*if (isTraitAuxBlancs()){
+                    cadre.setItem(ItemManager.customMapBlanc);
+                }else{
+                    cadre.setItem(ItemManager.customMapNoir);
+                }
+                */
+
                 cpt++;
+                i++;
                 decalerCase(caseCourante,cpt);
             }
+            isCaseBlanc=!isCaseBlanc;
             cpt=0;
+        }
+    }
+
+    public void initialiserCadres(){
+        Location caseCouranteBlancs=premiereCaseBlanc.clone();
+        Location caseCouranteNoirs=premiereCaseNoir.clone();
+        for (int i=0;i<64;i++){
+            cadresUUIDsBlancs[i] = getWorld().spawnEntity(caseCouranteBlancs, EntityType.ITEM_FRAME).getUniqueId();
+            cadresUUIDsNoirs[i] = getWorld().spawnEntity(caseCouranteNoirs, EntityType.ITEM_FRAME).getUniqueId();
+            decalerCase(caseCouranteBlancs, i+1);
+            decalerCase(caseCouranteNoirs, i+1);
+        }
+    }
+
+    public void retirerCadres(){
+        for (UUID uuid:cadresUUIDsBlancs){
+            Bukkit.getEntity(uuid).remove();
+        }
+        for (UUID uuid:cadresUUIDsNoirs){
+            Bukkit.getEntity(uuid).remove();
+        }
+    }
+
+    public void testResetPanneauEchiquiers(Boolean setAir){
+        World world=getWorld();
+        Location caseCouranteBlancs=premiereCaseBlanc.clone().add(+1,0,0);
+        Location caseCouranteNoirs=premiereCaseNoir.clone().add(+1,0,0);
+        Material material;
+        if (setAir){
+            material=Material.AIR;
+        }else{
+            material=Material.STONE;
+        }
+        for (int i=0;i<64;i++){
+            Bukkit.broadcastMessage("a");
+            world.getBlockAt(caseCouranteBlancs).setType(material);
+            world.getBlockAt(caseCouranteNoirs).setType(material);
+            decalerCase(caseCouranteBlancs, i+1);
+            decalerCase(caseCouranteNoirs, i+1);
         }
     }
 }

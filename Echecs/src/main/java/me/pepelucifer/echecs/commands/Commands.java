@@ -2,15 +2,20 @@ package me.pepelucifer.echecs.commands;
 
 
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.custommaps.TraceurImage;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapView;
 import sun.rmi.runtime.Log;
 
 public class Commands extends Logique implements CommandExecutor {
@@ -35,6 +40,12 @@ public class Commands extends Logique implements CommandExecutor {
             checkValidDisconnect(player);
         }else if (cmd.equals("dev")){
             Logique.isEnModeDeveloppement=!isEnModeDeveloppement;
+            if (isInLobby(player)){
+                LobbyPlayer lobbyPlayer=getLobbyPlayer(player);
+                if (lobbyPlayer.isPlaying()){
+                    lobbyPlayer.getSession().testResetPanneauEchiquiers(isEnModeDeveloppement);
+                }
+            }
             if (isEnModeDeveloppement){
                 Bukkit.broadcastMessage("§2Mode développement activé.");
             }else{
