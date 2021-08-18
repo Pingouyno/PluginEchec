@@ -23,36 +23,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemManager {
-    public static ItemStack chessPiece;
     public static ItemStack porteQuitter;
     public static ItemStack chessEmptySlot;
     public static ItemStack chessMenuButton;
     public static ItemStack customMapBlanc;
     public static ItemStack customMapNoir;
 
+    public static ItemStack[] whiteChessPiecesWhiteSquare = new ItemStack[6];
+    public static ItemStack[] whiteChessPiecesBlackSquare = new ItemStack[6];
+    public static ItemStack[] blackChessPiecesWhiteSquare = new ItemStack[6];
+    public static ItemStack[] blackChessPiecesBlackSquare = new ItemStack[6];
+    public static ItemStack[] emptySquares = new ItemStack[2];
+
     public static void init(){
-        createChessPiece();
         createPorteQuitter();
         createChessEmptySlotItem();
         createChessMenuButton();
-        createCustomMaps();
+        createChessPieces();
     }
 
-    private static void createChessPiece(){
-        ItemStack item = new ItemStack(Material.TOTEM_OF_UNDYING,1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD+"Pièce d'échec");
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.addEnchant(Enchantment.LUCK, 1,false);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        List<String> lore=new ArrayList(){{
-            add("Une ancienne pièce");
-            add("d'échec scintillante");
-        }};
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        chessPiece=item;
-    }
 
     private static void createPorteQuitter(){
         ItemStack item = new ItemStack(Material.OAK_DOOR,1);
@@ -96,15 +85,10 @@ public class ItemManager {
     }
 
 
-    private static void createCustomMaps(){
-        customMapBlanc=getCustomMap("test",true,false);
-        customMapNoir=getCustomMap("test",false,false);
-    }
-
-    public static ItemStack getCustomMap(String nomImage, Boolean isWhite, Boolean isCaseVide){
+    public static ItemStack getCustomMap(String nomImage, Boolean isCaseBlanc, Boolean isCaseVide){                                     //On n'utilise pas celle-là durant le partie car elle prend trop de temps à dessiner
         MapView view = Bukkit.createMap(Logique.chessWorld);
         view.getRenderers().clear();
-        TraceurImage traceurImage = new TraceurImage(nomImage,isWhite,isCaseVide);
+        TraceurImage traceurImage = new TraceurImage(nomImage,isCaseBlanc,isCaseVide);
         if (!traceurImage.load(nomImage)){
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Erreur dans le chargement de l'image ["+nomImage+"]");
             return null;
@@ -115,5 +99,45 @@ public class ItemManager {
         mapMeta.setMapView(view);
         map.setItemMeta(mapMeta);
         return map;
+    }
+
+    private static void createChessPieces(){
+        String[] nomsPossibles={"pion","tour","cavalier","fou","dame","roi"};
+        int i=0;
+
+        for (String nom:nomsPossibles){
+            whiteChessPiecesWhiteSquare[i]=getCustomMap(nom+"_blanc",true,false);
+            whiteChessPiecesBlackSquare[i]=getCustomMap(nom+"_blanc",false,false);
+            blackChessPiecesWhiteSquare[i]=getCustomMap(nom+"_noir",true,false);
+            blackChessPiecesBlackSquare[i]=getCustomMap(nom+"_noir",false,false);
+            i++;
+        }
+        emptySquares[0]=getCustomMap("roi_blanc",true,true);
+        emptySquares[1]=getCustomMap("roi_blanc",false,true);
+
+
+    }
+
+    public static ItemStack getChessPiece(int indexNom,Boolean isPieceBlanc, Boolean isCaseBlanc, Boolean isCaseVide){
+        if (isCaseVide){
+            if (isCaseBlanc){
+                return emptySquares[0];
+            }else{
+                return emptySquares[1];
+            }
+        }
+        if (isPieceBlanc){
+            if (isCaseBlanc){
+                return whiteChessPiecesWhiteSquare[indexNom];
+            }else{
+                return whiteChessPiecesBlackSquare[indexNom];
+            }
+        }else{
+            if (isCaseBlanc){
+                return blackChessPiecesWhiteSquare[indexNom];
+            }else{
+                return blackChessPiecesBlackSquare[indexNom];
+            }
+        }
     }
 }

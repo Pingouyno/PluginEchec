@@ -46,7 +46,7 @@ public class TraceurImage extends MapRenderer {
         if (done){
             return;
         }
-        canvas.drawImage(0,0,image);                                                                                    //changer le focntionnement car case vide rencontrera problème
+        canvas.drawImage(0,0,image);
         Byte color;
         if (white){
             color=MapPalette.matchColor(Color.white);
@@ -56,7 +56,7 @@ public class TraceurImage extends MapRenderer {
 
         for (int y=0;y<128;y++){
             for (int x=0;x<128;x++){
-                if (canvas.getPixel(x,y)==0 || caseVide){                                                                           //enlever le OR
+                if (canvas.getPixel(x,y)==0 || caseVide){                                                                           //enlever le OR peut-être
                     canvas.setPixel(x,y,color);
                 }
             }

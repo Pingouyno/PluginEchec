@@ -1,4 +1,5 @@
 package me.pepelucifer.echecs.objets;
+import me.pepelucifer.echecs.chesslib.Piece;
 import me.pepelucifer.echecs.chesslib.Side;
 import me.pepelucifer.echecs.chesslib.Square;
 import me.pepelucifer.echecs.chesslib.move.Move;
@@ -34,6 +35,7 @@ public class Session{
     Boolean auxBlancsAJouer;
     Location premiereCaseBlanc;
     Location premiereCaseNoir;
+    String derniereCaseCliquee;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -50,6 +52,7 @@ public class Session{
         this.locked=false;
         this.cadresUUIDsBlancs=new UUID[64];
         this.cadresUUIDsNoirs=new UUID[64];
+        this.derniereCaseCliquee=null;
         initialiserCadres();
     }
 
@@ -60,6 +63,10 @@ public class Session{
     public void setTraitAuxBlancs(boolean trait){
         auxBlancsAJouer=trait;
     }
+
+    public void setDernierClic(String nomCase){derniereCaseCliquee=nomCase;}
+
+    public String getDernierClic(){return derniereCaseCliquee;}
 
     public int getSessionId(){
         return id;
@@ -129,7 +136,9 @@ public class Session{
         }
     }
 
-    public void jouer(String coup){
+    public void jouer(String caseDebut,String caseFin){
+        String coup=caseDebut+caseFin;
+        setDernierClic(null);
         Move move;
         if (isTraitAuxBlancs()){
             move = new Move(coup,Side.WHITE);
@@ -139,6 +148,8 @@ public class Session{
         if (isCoupLegal(move)){
             echiquier.doMove(move);
             inverserTrait();
+
+            /*
             if (isTraitAuxBlancs()){
                 Bukkit.broadcastMessage("Les blancs jouent :");
             }else{
@@ -146,10 +157,13 @@ public class Session{
             }
             Bukkit.broadcastMessage("Depart du coup : " + move.getFrom());
             Bukkit.broadcastMessage("Arrivee du coup : " + move.getTo());
+            */
+
         }else{
             getPlayer(isTraitAuxBlancs()).getPlayer().sendMessage(ChatColor.RED+"Coup invalide!");
         }
         drawBoards();
+        Logique.checkGameEnd(this);
     }
 
 
@@ -160,22 +174,43 @@ public class Session{
 
     public void decalerCase(Location caseCourante, int cpt){
         if (cpt%8==0){
-            caseCourante.setY(caseCourante.getY()-1);
-            caseCourante.setZ(caseCourante.getZ()-7);
+            caseCourante.add(0,-1,-7);
         }else{
-            caseCourante.setZ(caseCourante.getZ()+1);
+            caseCourante.add(0,0,1);
+        }
+    }
+
+    public void decalerCadre(Location caseCourante, int cpt, Boolean isEchiqBlanc){
+        if (isEchiqBlanc){                                                                                                //Square.getvalues va de a1,b1,c1, etc
+            if (cpt%8==0){
+                caseCourante.add(0,+1,-7);
+            }else{
+                caseCourante.add(0,0,1);
+            }
+        }else{
+            if (cpt%8==0){
+                caseCourante.add(0,-1,7);
+            }else{
+                caseCourante.add(0,0,-1);
+            }
         }
     }
 
     public void drawBoardFromPerspective(boolean asWhite){
         Location caseCourante;
         String[] echiq;
+        int coord_x;
+        int coord_y;
         if (asWhite){
             caseCourante=premiereCaseBlanc.clone();
             echiq=echiquier.toStringFromWhiteViewPoint().split("\n");
+            coord_x=0;
+            coord_y=7;
         }else{
             caseCourante=premiereCaseNoir.clone();
             echiq=echiquier.toStringFromBlackViewPoint().split("\n");
+            coord_x=7;
+            coord_y=0;
         }
         int cpt=0;
         int i=0;
@@ -186,57 +221,52 @@ public class Session{
                 isCaseBlanc=!isCaseBlanc;
                 c=str.charAt(cpt);
                 Boolean isPieceBlanc=(Character.isUpperCase(c));
-                String couleur;
-                if (isPieceBlanc){
-                    couleur="_blanc";
-                }else{
-                    couleur="_noir";
-                }
                 Boolean isCaseVide=false;
-                String piece="";
+                int indexNom=-1;
 
                 switch (Character.toLowerCase(c)) {
                     case 'p':
-                        piece="pion";
+                        indexNom=0;
                         break;
                     case 'r':
-                        piece="tour";
+                        indexNom=1;
                         break;
                     case 'n':
-                        piece="cavalier";
+                        indexNom=2;
                         break;
                     case 'b':
-                        piece="fou";
+                        indexNom=3;
                         break;
                     case 'q':
-                        piece="dame";
+                        indexNom=4;
                         break;
                     case 'k':
-                        piece="roi";
+                        indexNom=5;
                         break;
                     case '.':
+                        indexNom=6;
                         isCaseVide=true;
                         break;
                 }
                 Entity entity;
                 if (asWhite){
-                    entity = Bukkit.getEntity(cadresUUIDsBlancs[i]);
+                    entity = Bukkit.getEntity(cadresUUIDsBlancs[coordonnesadaptees(coord_x,coord_y,asWhite)]);
+                    coord_x++;
+                    if (coord_x==8){
+                        coord_x=0;
+                        coord_y--;
+                    }
                 }else{
-                    entity = Bukkit.getEntity(cadresUUIDsNoirs[i]);
+                    entity = Bukkit.getEntity(cadresUUIDsNoirs[coordonnesadaptees(coord_x,coord_y,asWhite)]);
+                    coord_x--;
+                    if (coord_x==-1){
+                        coord_x=7;
+                        coord_y++;
+                    }
                 }
-                String nomFichier="test"/*+couleur*/;                                                                   //REMETTRE LA COULEUR
-                ItemStack map = ItemManager.getCustomMap(nomFichier,isCaseBlanc,isCaseVide);
+                ItemStack map = ItemManager.getChessPiece(indexNom,isPieceBlanc,isCaseBlanc,isCaseVide);
                 ItemFrame cadre = (ItemFrame) entity;
-
-
                 cadre.setItem(map);
-                /*if (isTraitAuxBlancs()){
-                    cadre.setItem(ItemManager.customMapBlanc);
-                }else{
-                    cadre.setItem(ItemManager.customMapNoir);
-                }
-                */
-
                 cpt++;
                 i++;
                 decalerCase(caseCourante,cpt);
@@ -246,14 +276,27 @@ public class Session{
         }
     }
 
+
+    private int coordonnesadaptees(int x,int y, Boolean asWhite){                                                      //Fonction Board.toString() avance de case en case d'une manière différente que Square.values()
+        return (y*8)+x;
+    }
+
     public void initialiserCadres(){
-        Location caseCouranteBlancs=premiereCaseBlanc.clone();
-        Location caseCouranteNoirs=premiereCaseNoir.clone();
+        Location caseCouranteBlancs=premiereCaseBlanc.clone().add(0,-7,0);
+        Location caseCouranteNoirs=premiereCaseNoir.clone().add(0,0,7);
+        String nomCase;
         for (int i=0;i<64;i++){
-            cadresUUIDsBlancs[i] = getWorld().spawnEntity(caseCouranteBlancs, EntityType.ITEM_FRAME).getUniqueId();
-            cadresUUIDsNoirs[i] = getWorld().spawnEntity(caseCouranteNoirs, EntityType.ITEM_FRAME).getUniqueId();
-            decalerCase(caseCouranteBlancs, i+1);
-            decalerCase(caseCouranteNoirs, i+1);
+            nomCase=Square.squareAt(i).toString();
+            Entity cadreBlanc=getWorld().spawnEntity(caseCouranteBlancs, EntityType.ITEM_FRAME);
+            Entity cadreNoir=getWorld().spawnEntity(caseCouranteNoirs, EntityType.ITEM_FRAME);
+            cadresUUIDsBlancs[i] = cadreBlanc.getUniqueId();
+            cadresUUIDsNoirs[i] = cadreNoir.getUniqueId();
+            cadreBlanc.setCustomName(nomCase);
+            cadreNoir.setCustomName(nomCase);
+            decalerCadre(caseCouranteBlancs, i+1,true);
+            decalerCadre(caseCouranteNoirs, i+1,false);
+            ((ItemFrame) cadreBlanc).setVisible(false);
+            ((ItemFrame) cadreNoir).setVisible(false);
         }
     }
 
@@ -277,7 +320,6 @@ public class Session{
             material=Material.STONE;
         }
         for (int i=0;i<64;i++){
-            Bukkit.broadcastMessage("a");
             world.getBlockAt(caseCouranteBlancs).setType(material);
             world.getBlockAt(caseCouranteNoirs).setType(material);
             decalerCase(caseCouranteBlancs, i+1);

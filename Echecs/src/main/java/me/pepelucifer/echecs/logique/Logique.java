@@ -154,35 +154,32 @@ public class Logique {
         return false;
     }
 
+    public LobbyPlayer getLobbyPlayer(HumanEntity player){
+        return privateFindLobbyPlayer(player.getName());
+    }
+
     public LobbyPlayer getLobbyPlayer(Player player){
-        String nom=player.getName();
+        return privateFindLobbyPlayer(player.getName());
+    }
+
+    public LobbyPlayer getLobbyPlayer(String nomJoueur){
+        return privateFindLobbyPlayer(nomJoueur);
+    }
+
+    private LobbyPlayer privateFindLobbyPlayer(String nomJoueur){                                            //Pour raison de propreté, ne pas appeler directement cette méthode
         for (LobbyPlayer joueur:lobby.getWaitingPlayers()){
-            if (joueur.getName().equals(nom)){
+            if (joueur.getName().equals(nomJoueur)){
                 return joueur;
             }
         }
         for (LobbyPlayer joueur: lobby.getPlayingPlayers()){
-            if (joueur.getName().equals(nom)){
+            if (joueur.getName().equals(nomJoueur)){
                 return joueur;
             }
         }
         return null;
     }
 
-    public LobbyPlayer getLobbyPlayer(HumanEntity player){
-        String nom=player.getName();
-        for (LobbyPlayer joueur:lobby.getWaitingPlayers()){
-            if (joueur.getName().equals(nom)){
-                return joueur;
-            }
-        }
-        for (LobbyPlayer joueur: lobby.getPlayingPlayers()){
-            if (joueur.getName().equals(nom)){
-                return joueur;
-            }
-        }
-        return null;
-    }
 
     public void connectPlayer(Player player){
         player.teleport(lobbySpawn);
@@ -194,9 +191,11 @@ public class Logique {
     }
 
     public static void disconnectPlayer(LobbyPlayer lobbyPlayer){
-        lobbyPlayer.getPlayer().teleport(worldSpawn);
-        lobbyPlayer.getPlayer().getInventory().removeItem(ItemManager.porteQuitter);
-        lobbyPlayer.getPlayer().getInventory().removeItem(ItemManager.chessMenuButton);
+        Player player=lobbyPlayer.getPlayer();
+        player.teleport(worldSpawn);
+        player.getInventory().removeItem(ItemManager.porteQuitter);
+        player.getInventory().removeItem(ItemManager.chessMenuButton);
+        player.closeInventory();
         if (lobbyPlayer.isPlaying()){
             lobby.getPlayingPlayers().remove(lobbyPlayer);
             lobbyPlayer.getSession().getPlayers().remove(lobbyPlayer);
@@ -206,6 +205,7 @@ public class Logique {
         if (lobbyPlayer.isPlaying()){
             checkGameEnd(lobbyPlayer.getSession());
         }
+
     }
 
     public static Location getLocationDecalee(int count, Location location){

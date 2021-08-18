@@ -1,5 +1,6 @@
 package me.pepelucifer.echecs.events;
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.chesslib.Square;
 import me.pepelucifer.echecs.custommaps.TraceurImage;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
@@ -56,27 +57,10 @@ public class Events extends EventLogique implements Listener{
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerChat (AsyncPlayerChatEvent event){
         if (isInLobby(event.getPlayer())){
-            event.setCancelled(true);
             LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
             if(lobbyPlayer.isPlaying()){
-                Session session = lobbyPlayer.getSession();
-                if(session.isTraitAuxBlancs() == (lobbyPlayer.isWhite())) {
-                    String coup = event.getMessage();
-
-                    new BukkitRunnable() {                                                //boucle pour rendre le reste du code synchrone, on va changer la manière de jouer les coups dans le futur donc ce n'est pas un problème
-                        int time=1;
-                        public void run() {
-                            if (time==0){
-                                session.jouer(coup);
-                                cancel();
-                                return;
-                            }
-                            time--;
-                        }
-                    }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 1L, 2L);
-                }else{
-                    event.getPlayer().sendMessage(ChatColor.RED+"Ce n'est pas votre tour!");
-                }
+                //event.setCancelled(true);
+                //lobbyPlayer.getSession().messageJoueurs(event.getMessage());
             }
         }else if (Logique.isEnModeDeveloppement){
             String coup = event.getMessage();
@@ -86,7 +70,8 @@ public class Events extends EventLogique implements Listener{
                 int time=0;
                 public void run() {
                     if (time==1){
-                        event.getPlayer().getInventory().setItem(0,ItemManager.getCustomMap("test",false,false));
+                        //event.getPlayer().getInventory().setItem(0,ItemManager.getCustomMap(event.getMessage(),false,false));
+                        //event.getPlayer().sendMessage(Square.squareAt(Integer.valueOf(event.getMessage())).toString());
                         cancel();
                         return;
                     }
@@ -107,6 +92,18 @@ public class Events extends EventLogique implements Listener{
     public void onInteractEntity(PlayerInteractEntityEvent event) {
         if (isInLobby(event.getPlayer())){
             event.setCancelled(true);
+            LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
+            if(lobbyPlayer.isPlaying()) {
+                Session session = lobbyPlayer.getSession();
+                if (session.isTraitAuxBlancs() == (lobbyPlayer.isWhite())) {
+                    String caseClique = event.getRightClicked().getCustomName();
+                    if (session.getDernierClic()==null){
+                        session.setDernierClic(caseClique);
+                    }else{
+                        session.jouer(session.getDernierClic(),caseClique);
+                    }
+                }
+            }
         }
     }
 

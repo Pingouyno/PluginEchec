@@ -4,6 +4,7 @@ import me.pepelucifer.echecs.commands.Commands;
 import me.pepelucifer.echecs.events.Events;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
+import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,12 +20,15 @@ public final class Echecs extends JavaPlugin {
         getCommand("quitter").setExecutor(new Commands());
         getCommand("dev").setExecutor(new Commands());
         ItemManager.init();
-        getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"Plugin Echecs démarré.");
+        getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"Plugin Echecs demarre.");
     }
 
     @Override
     public void onDisable() {
-        getServer().getConsoleSender().sendMessage(ChatColor.RED+"echecs arrêté.");
+        getServer().getConsoleSender().sendMessage(ChatColor.RED+"Plugin Ehecs arrete.");
+        for (LobbyPlayer lobbyPlayer:Logique.lobby.getWaitingPlayers()){
+            Logique.disconnectPlayer(lobbyPlayer);
+        }
         for (Session session:Logique.lobby.getSessions()){
             Logique.lobby.endSession(session);
         }

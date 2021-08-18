@@ -6,10 +6,12 @@ import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class EventLogique extends Logique {
     public void checkItemStack(ItemStack item, Object objectPlayer) {
@@ -33,8 +35,17 @@ public class EventLogique extends Logique {
                     InventoryManager.giveChessMenuInventory(player);
                     return true;
                 case 2:                                                                 //chessHeadItem
-                    LobbyPlayer lobbyPlayer = getLobbyPlayer(player);
-                    lobby.startSession(lobbyPlayer,getOtherPlayer(lobbyPlayer));
+                    LobbyPlayer ceJoueur = getLobbyPlayer(player);
+                    LobbyPlayer autreJoueur = getLobbyPlayer(((SkullMeta) item.getItemMeta()).getOwningPlayer().getPlayer());
+                    if (ceJoueur!=null && autreJoueur!=null){
+                        if (!ceJoueur.isInSession() && !autreJoueur.isInSession()){
+                            lobby.startSession(ceJoueur,autreJoueur);
+                        }else{
+                            player.sendMessage(ChatColor.RED+"Ce joueur est déja en train de jouer!");
+                        }
+                    }else{
+                        player.sendMessage(ChatColor.RED+"Joueur introuvable!");
+                    }
                     return true;
                 default:
                     Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"ERREUR : OBJET LOCALIZEDNAME 'CHESS' SANS SUBTYPE VALIDE");
