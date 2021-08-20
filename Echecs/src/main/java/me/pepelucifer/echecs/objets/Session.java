@@ -1,11 +1,9 @@
 package me.pepelucifer.echecs.objets;
-import me.pepelucifer.echecs.chesslib.Piece;
-import me.pepelucifer.echecs.chesslib.Side;
-import me.pepelucifer.echecs.chesslib.Square;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import me.pepelucifer.echecs.chesslib.*;
 import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
-import me.pepelucifer.echecs.chesslib.Board;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -15,10 +13,13 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapCanvas;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -30,12 +31,15 @@ public class Session{
     ArrayList<LobbyPlayer> players;
     boolean started;
     public boolean locked;
+    public boolean over;
     World world;
     Board echiquier;
     Boolean auxBlancsAJouer;
     Location premiereCaseBlanc;
     Location premiereCaseNoir;
     String derniereCaseCliquee;
+    private String leVainqueur;
+    public int winType;
 
     public Session(int id, LobbyPlayer p1, LobbyPlayer p2) {
         this.id = id;
@@ -50,10 +54,13 @@ public class Session{
         this.premiereCaseNoir = Logique.getLocationDecalee(id,Logique.premiereCaseUniverselleNoir);
         this.world=Logique.chessWorld;
         this.locked=false;
+        this.over=false;
         this.cadresUUIDsBlancs=new UUID[64];
         this.cadresUUIDsNoirs=new UUID[64];
         this.derniereCaseCliquee=null;
-        initialiserCadres();
+        if (!Logique.isEnModeDeveloppement){                                                        //Enlever le IF
+            initialiserCadresEtBlocs();
+        }
     }
 
     public boolean isTraitAuxBlancs(){
@@ -65,6 +72,10 @@ public class Session{
     }
 
     public void setDernierClic(String nomCase){derniereCaseCliquee=nomCase;}
+
+    public void setVainqueur(String vainqueur){leVainqueur=vainqueur;}
+
+    public String getVainqueur(){return leVainqueur;}
 
     public String getDernierClic(){return derniereCaseCliquee;}
 
@@ -88,6 +99,8 @@ public class Session{
         return lobby;
     }
 
+    public int getWinType(){return winType;}
+
     public boolean isLocked(){return locked;}
 
     public void inverserTrait(){
@@ -100,6 +113,10 @@ public class Session{
 
     public ArrayList<LobbyPlayer> getPlayers(){
         return players;
+    }
+
+    public boolean isOver(){
+        return over;
     }
 
     public boolean isCoupLegal(Move move){
@@ -147,8 +164,11 @@ public class Session{
         }
         if (isCoupLegal(move)){
             echiquier.doMove(move);
+            drawBoards();
+            redessinerCase(caseDebut,true);
+            redessinerCase(caseFin,true);
+            Logique.checkGameEnd(this);
             inverserTrait();
-
             /*
             if (isTraitAuxBlancs()){
                 Bukkit.broadcastMessage("Les blancs jouent :");
@@ -160,10 +180,10 @@ public class Session{
             */
 
         }else{
-            getPlayer(isTraitAuxBlancs()).getPlayer().sendMessage(ChatColor.RED+"Coup invalide!");
+            getPlayer(isTraitAuxBlancs()).getPlayer().sendMessage(ChatColor.RED+"Ce coup est illégal!");
+            setDernierClic(null);
+            redessinerCase(caseDebut,false);
         }
-        drawBoards();
-        Logique.checkGameEnd(this);
     }
 
 
@@ -264,7 +284,7 @@ public class Session{
                         coord_y++;
                     }
                 }
-                ItemStack map = ItemManager.getChessPiece(indexNom,isPieceBlanc,isCaseBlanc,isCaseVide);
+                ItemStack map = ItemManager.getChessPiece(indexNom,isPieceBlanc,isCaseBlanc,isCaseVide,false);
                 ItemFrame cadre = (ItemFrame) entity;
                 cadre.setItem(map);
                 cpt++;
@@ -281,12 +301,20 @@ public class Session{
         return (y*8)+x;
     }
 
-    public void initialiserCadres(){
+    public void initialiserCadresEtBlocs(){
         Location caseCouranteBlancs=premiereCaseBlanc.clone().add(0,-7,0);
         Location caseCouranteNoirs=premiereCaseNoir.clone().add(0,0,7);
         String nomCase;
         for (int i=0;i<64;i++){
             nomCase=Square.squareAt(i).toString();
+
+            Block blocBlanc = getWorld().getBlockAt(caseCouranteBlancs.getBlockX()+1,caseCouranteBlancs.getBlockY(),caseCouranteBlancs.getBlockZ());
+            Block blocNoir = getWorld().getBlockAt(caseCouranteNoirs.getBlockX()+1,caseCouranteNoirs.getBlockY(),caseCouranteNoirs.getBlockZ());
+            blocBlanc.setType(Material.STONE);
+            blocNoir.setType(Material.STONE);
+            Logique.setValeurCase(blocBlanc,nomCase);
+            Logique.setValeurCase(blocNoir,nomCase);
+
             Entity cadreBlanc=getWorld().spawnEntity(caseCouranteBlancs, EntityType.ITEM_FRAME);
             Entity cadreNoir=getWorld().spawnEntity(caseCouranteNoirs, EntityType.ITEM_FRAME);
             cadresUUIDsBlancs[i] = cadreBlanc.getUniqueId();
@@ -309,6 +337,7 @@ public class Session{
         }
     }
 
+
     public void testResetPanneauEchiquiers(Boolean setAir){
         World world=getWorld();
         Location caseCouranteBlancs=premiereCaseBlanc.clone().add(+1,0,0);
@@ -325,5 +354,53 @@ public class Session{
             decalerCase(caseCouranteBlancs, i+1);
             decalerCase(caseCouranteNoirs, i+1);
         }
+    }
+
+
+    public void redessinerCase(String caseRedessinee,Boolean isOverlayJaune){
+        Square cetteCase=Square.valueOf(caseRedessinee);
+        Boolean isPieceBlanc;
+        Boolean isCaseBlanc;
+        Boolean isCaseVide;
+        int indexNom=-1;
+        Piece piece = getEchiquier().getPiece(cetteCase);
+        isPieceBlanc=(piece.getPieceSide()==Side.WHITE);
+        isCaseBlanc=cetteCase.isLightSquare();
+        isCaseVide=false;
+        if (piece.getPieceType()!=null) {
+            switch (piece.getPieceType()){
+                case PAWN:
+                    indexNom=0;
+                    break;
+                case ROOK:
+                    indexNom=1;
+                    break;
+                case KNIGHT:
+                    indexNom=2;
+                    break;
+                case BISHOP:
+                    indexNom=3;
+                    break;
+                case QUEEN:
+                    indexNom=4;
+                    break;
+                case KING:
+                    indexNom=5;
+                    break;
+                case NONE:
+                    indexNom=5;
+                    isCaseVide=true;
+                    break;
+            }
+        }else{
+            indexNom=5;
+            isCaseVide=true;
+        }
+        int numeroCase=cetteCase.ordinal();
+        ItemFrame cadreBlanc = (ItemFrame) Bukkit.getEntity(cadresUUIDsBlancs[numeroCase]);
+        ItemFrame cadreNoir = (ItemFrame) Bukkit.getEntity(cadresUUIDsNoirs[numeroCase]);
+        ItemStack mapJaune=ItemManager.getChessPiece(indexNom,isPieceBlanc,isCaseBlanc,isCaseVide,isOverlayJaune);
+        cadreBlanc.setItem(mapJaune);
+        cadreNoir.setItem(mapJaune);
     }
 }

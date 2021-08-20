@@ -46,7 +46,25 @@ public final class Lobby{
         return spawn;
     }
 
+    private int trouverCompteurValeurBasse(){
+        int pointeurSession=0;
+        if (getSessions().size()==0){
+            return pointeurSession;
+        }else{
+            while (true){                                                                                                       //Pas sécuritaire mais ne devrait jamais causer de problèmes
+                for (Session session:getSessions()){
+                    if (session.getSessionId()==count){
+                        pointeurSession++;
+                        continue;
+                    }
+                    return pointeurSession;
+                }
+            }
+        }
+    }
+
     public void startSession(LobbyPlayer player1, LobbyPlayer player2){
+        count=trouverCompteurValeurBasse();
         Session session = new Session(count, player1,player2);
         sessionList.add(session);
         for (LobbyPlayer joueurs: session.players){
@@ -59,11 +77,14 @@ public final class Lobby{
     }
 
     public void endSession(Session session){
-        Logique.endGame(session);
-        for (LobbyPlayer player:session.getPlayers()){
-            sessionList.remove(player);
+        session.locked=true;
+        session.over=true;
+        int pCount=session.getPlayerCount();
+        for (int i=0;i<pCount;i++){
+            LobbyPlayer lobbyPlayer = session.getPlayers().get(0);
+            Logique.disconnectPlayer(lobbyPlayer);
         }
         session.retirerCadres();
-        getSessions().remove(this);
+        getSessions().remove(session);
     }
 }

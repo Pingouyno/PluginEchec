@@ -16,16 +16,18 @@ public class TraceurImage extends MapRenderer {
     private boolean done;
     private boolean white;
     private boolean caseVide;
+    private boolean overlayJaune;
 
     public TraceurImage(){
         done=false;
     }
 
-    public TraceurImage(String nomFichier, Boolean isWhite, Boolean isCaseVide){
+    public TraceurImage(String nomFichier, Boolean isWhite, Boolean isCaseVide, Boolean isOverlayJaune){
         load(nomFichier);
         done=false;
         white=isWhite;
         caseVide=isCaseVide;
+        overlayJaune=isOverlayJaune;
     }
 
     public boolean load(String nomFichier){
@@ -56,7 +58,9 @@ public class TraceurImage extends MapRenderer {
 
         for (int y=0;y<128;y++){
             for (int x=0;x<128;x++){
-                if (canvas.getPixel(x,y)==0 || caseVide){                                                                           //enlever le OR peut-être
+                if (overlayJaune&&(x<6||y<6||x>121||y>121)){
+                    canvas.setPixel(x,y,MapPalette.matchColor(Color.yellow));
+                }else if (canvas.getPixel(x,y)==0 || caseVide){                                                                           //enlever le OR peut-être
                     canvas.setPixel(x,y,color);
                 }
             }

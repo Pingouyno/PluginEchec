@@ -6,6 +6,7 @@ import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,13 +26,17 @@ public final class Echecs extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getServer().getConsoleSender().sendMessage(ChatColor.RED+"Plugin Ehecs arrete.");
-        for (LobbyPlayer lobbyPlayer:Logique.lobby.getWaitingPlayers()){
-            Logique.disconnectPlayer(lobbyPlayer);
+        int waitingPlayerSize = Logique.lobby.getWaitingPlayers().size();                                                             //Pour une quelconque raison, les boucles FOR buguent lorsqu'on désactive le plugin
+        int playingPlayerSize = Logique.lobby.getPlayingPlayers().size();
+
+        for (int i=0;i<waitingPlayerSize;i++){
+            Logique.disconnectPlayer(Logique.lobby.getWaitingPlayers().get(0));
         }
-        for (Session session:Logique.lobby.getSessions()){
-            Logique.lobby.endSession(session);
+        for (int i=0;i<playingPlayerSize;i++){
+            Logique.lobby.getPlayingPlayers().get(0).getSession().locked=true;
+            Logique.disconnectPlayer(Logique.lobby.getPlayingPlayers().get(0));
         }
+        getServer().getConsoleSender().sendMessage(ChatColor.RED+"Plugin Echecs arrete.");
     }
 }
 

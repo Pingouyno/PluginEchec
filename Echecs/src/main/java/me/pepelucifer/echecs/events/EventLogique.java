@@ -7,11 +7,16 @@ import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.MetadataValue;
+
+import java.util.List;
 
 public class EventLogique extends Logique {
     public void checkItemStack(ItemStack item, Object objectPlayer) {
@@ -53,15 +58,6 @@ public class EventLogique extends Logique {
             }
         }
         return false;
-    }
-
-    private LobbyPlayer getOtherPlayer(LobbyPlayer thisP){
-        for (LobbyPlayer people : lobby.getWaitingPlayers()){
-            if (!people.equals(thisP)){
-                return (people);
-            }
-        }
-        return null;
     }
 
 

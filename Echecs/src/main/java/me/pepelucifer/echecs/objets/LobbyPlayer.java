@@ -2,15 +2,15 @@ package me.pepelucifer.echecs.objets;
 import org.bukkit.entity.Player;
 
 public class LobbyPlayer{
-    Player player;
-    Session session;
-    public boolean isPlaying;
+    private Player player;
+    private Session session;
+    private boolean playing;
     public boolean isWhite;
-    int timeLeft;
+    private int timeLeft;
 
     public LobbyPlayer(Player player) {
         this.player = (player);
-        this.isPlaying=false;
+        this.playing=false;
         this.isWhite=false;
         this.timeLeft=600;
     }
@@ -33,12 +33,16 @@ public class LobbyPlayer{
         return getSession().getSessionId();
     }
 
+    public void setPlaying(boolean isPlaying) {
+        playing=isPlaying;
+    }
+
     public String getName(){
         return player.getName();
     }
 
     public boolean isPlaying(){
-        return isPlaying;
+        return playing;
     }
 
     public boolean isInSession() { return (getSession()!=null);}

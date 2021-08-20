@@ -33,7 +33,12 @@ public class ItemManager {
     public static ItemStack[] whiteChessPiecesBlackSquare = new ItemStack[6];
     public static ItemStack[] blackChessPiecesWhiteSquare = new ItemStack[6];
     public static ItemStack[] blackChessPiecesBlackSquare = new ItemStack[6];
+    public static ItemStack[] whiteChessPiecesWhiteSquareYellow = new ItemStack[6];
+    public static ItemStack[] whiteChessPiecesBlackSquareYellow = new ItemStack[6];
+    public static ItemStack[] blackChessPiecesWhiteSquareYellow = new ItemStack[6];
+    public static ItemStack[] blackChessPiecesBlackSquareYellow = new ItemStack[6];
     public static ItemStack[] emptySquares = new ItemStack[2];
+    public static ItemStack[] emptySquaresYellow = new ItemStack[2];
 
     public static void init(){
         createPorteQuitter();
@@ -85,10 +90,10 @@ public class ItemManager {
     }
 
 
-    public static ItemStack getCustomMap(String nomImage, Boolean isCaseBlanc, Boolean isCaseVide){                                     //On n'utilise pas celle-là durant le partie car elle prend trop de temps à dessiner
+    public static ItemStack getCustomMap(String nomImage, Boolean isCaseBlanc, Boolean isCaseVide, Boolean overlayJaune){                                     //On n'utilise pas celle-là durant la partie car elle prend trop de temps à dessiner
         MapView view = Bukkit.createMap(Logique.chessWorld);
         view.getRenderers().clear();
-        TraceurImage traceurImage = new TraceurImage(nomImage,isCaseBlanc,isCaseVide);
+        TraceurImage traceurImage = new TraceurImage(nomImage,isCaseBlanc,isCaseVide,overlayJaune);
         if (!traceurImage.load(nomImage)){
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Erreur dans le chargement de l'image ["+nomImage+"]");
             return null;
@@ -106,37 +111,67 @@ public class ItemManager {
         int i=0;
 
         for (String nom:nomsPossibles){
-            whiteChessPiecesWhiteSquare[i]=getCustomMap(nom+"_blanc",true,false);
-            whiteChessPiecesBlackSquare[i]=getCustomMap(nom+"_blanc",false,false);
-            blackChessPiecesWhiteSquare[i]=getCustomMap(nom+"_noir",true,false);
-            blackChessPiecesBlackSquare[i]=getCustomMap(nom+"_noir",false,false);
+            whiteChessPiecesWhiteSquare[i]=getCustomMap(nom+"_blanc",true,false,false);
+            whiteChessPiecesBlackSquare[i]=getCustomMap(nom+"_blanc",false,false,false);
+            blackChessPiecesWhiteSquare[i]=getCustomMap(nom+"_noir",true,false,false);
+            blackChessPiecesBlackSquare[i]=getCustomMap(nom+"_noir",false,false,false);
+
+            whiteChessPiecesWhiteSquareYellow[i]=getCustomMap(nom+"_blanc",true,false,true);
+            whiteChessPiecesBlackSquareYellow[i]=getCustomMap(nom+"_blanc",false,false,true);
+            blackChessPiecesWhiteSquareYellow[i]=getCustomMap(nom+"_noir",true,false,true);
+            blackChessPiecesBlackSquareYellow[i]=getCustomMap(nom+"_noir",false,false,true);
             i++;
         }
-        emptySquares[0]=getCustomMap("roi_blanc",true,true);
-        emptySquares[1]=getCustomMap("roi_blanc",false,true);
+        emptySquares[0]=getCustomMap("roi_blanc",true,true,false);
+        emptySquares[1]=getCustomMap("roi_blanc",false,true,false);
+        emptySquaresYellow[0]=getCustomMap("roi_blanc",true,true,true);
+        emptySquaresYellow[1]=getCustomMap("roi_blanc",false,true,true);
 
 
     }
 
-    public static ItemStack getChessPiece(int indexNom,Boolean isPieceBlanc, Boolean isCaseBlanc, Boolean isCaseVide){
-        if (isCaseVide){
-            if (isCaseBlanc){
-                return emptySquares[0];
-            }else{
-                return emptySquares[1];
+    public static ItemStack getChessPiece(int indexNom,Boolean isPieceBlanc, Boolean isCaseBlanc, Boolean isCaseVide, Boolean overlayJaune){
+        if (overlayJaune){
+            if (isCaseVide){
+                if (isCaseBlanc){
+                    return emptySquaresYellow[0];
+                }else{
+                    return emptySquaresYellow[1];
+                }
             }
-        }
-        if (isPieceBlanc){
-            if (isCaseBlanc){
-                return whiteChessPiecesWhiteSquare[indexNom];
+            if (isPieceBlanc){
+                if (isCaseBlanc){
+                    return whiteChessPiecesWhiteSquareYellow[indexNom];
+                }else{
+                    return whiteChessPiecesBlackSquareYellow[indexNom];
+                }
             }else{
-                return whiteChessPiecesBlackSquare[indexNom];
+                if (isCaseBlanc){
+                    return blackChessPiecesWhiteSquareYellow[indexNom];
+                }else{
+                    return blackChessPiecesBlackSquareYellow[indexNom];
+                }
             }
         }else{
-            if (isCaseBlanc){
-                return blackChessPiecesWhiteSquare[indexNom];
+            if (isCaseVide){
+                if (isCaseBlanc){
+                    return emptySquares[0];
+                }else{
+                    return emptySquares[1];
+                }
+            }
+            if (isPieceBlanc){
+                if (isCaseBlanc){
+                    return whiteChessPiecesWhiteSquare[indexNom];
+                }else{
+                    return whiteChessPiecesBlackSquare[indexNom];
+                }
             }else{
-                return blackChessPiecesBlackSquare[indexNom];
+                if (isCaseBlanc){
+                    return blackChessPiecesWhiteSquare[indexNom];
+                }else{
+                    return blackChessPiecesBlackSquare[indexNom];
+                }
             }
         }
     }
