@@ -27,4 +27,11 @@ public class InventoryManager {
         }
         player.openInventory(inventory);
     }
+
+    public static void giveChessResignInventory(Player player){
+        Inventory inventory = Bukkit.createInventory(null, 9, "Voulez-vous abandonner?");
+        inventory.setItem(2,ItemManager.chessAbandonItems[1]);
+        inventory.setItem(6,ItemManager.chessAbandonItems[2]);
+        player.openInventory(inventory);
+    }
 }

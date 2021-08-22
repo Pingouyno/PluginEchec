@@ -5,7 +5,10 @@ import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.objets.Lobby;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
+import me.pepelucifer.echecs.scoreboard.SB;
 import me.pepelucifer.echecs.sons.PlaySound;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,6 +16,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -61,7 +66,6 @@ public class Logique {
 
     public static void devJouerCoup(String coup){
         Move move;
-
         if (devBoardTraitAuxBlancs){
             move = new Move(coup, Side.WHITE);
         }else{
@@ -115,7 +119,7 @@ public class Logique {
         }
     }
 
-    public boolean isInLobby(Player player){
+    public static boolean isInLobby(Player player){
         /*
         if (player.getWorld().getName().equals(getWorld().getName())){                          //Ce code est plus performant, mais n'est pas fonctionnel avec le serveur test. On va l'intégrer dans M2C.
             return true;
@@ -221,7 +225,7 @@ public class Logique {
 
     public void connectPlayer(Player player){
         player.teleport(lobbySpawn);
-        //player.getInventory().clear();                                                                                            //REMETTRE AVANT MISE EN PROD!
+        player.getInventory().clear();
         player.getInventory().setItem(8,ItemManager.porteQuitter);
         player.getInventory().setItem(0,ItemManager.chessMenuButton);
         player.setHealth(20.0);
@@ -233,16 +237,18 @@ public class Logique {
         for (LobbyPlayer people:lobby.getWaitingPlayers()){
             PlaySound.playVotingSound(people.getPlayer());
         }
+        SB.redrawAllScoreBoard(lobby);
     }
 
     public static void disconnectPlayer(LobbyPlayer lobbyPlayer){
         Player player=lobbyPlayer.getPlayer();
+        player.closeInventory();
+        player.getInventory().clear();
         //player.setFlying(false);                                                                                                   //REMETTRE CES LIGNES AVANT MISE EN PROD
         //player.setAllowFlight(false);
         player.teleport(worldSpawn);
         player.getInventory().removeItem(ItemManager.porteQuitter);
         player.getInventory().removeItem(ItemManager.chessMenuButton);
-        player.closeInventory();
         broadcastDisconnectMessage(lobbyPlayer);
         if (lobbyPlayer.isPlaying()){
             lobby.getPlayingPlayers().remove(lobbyPlayer);
@@ -256,6 +262,7 @@ public class Logique {
                 lobby.endSession(lobbyPlayer.getSession());
             }
         }
+        SB.redrawAllScoreBoard(lobby);
     }
 
     public static Location getLocationDecalee(int count, Location location){
@@ -332,6 +339,12 @@ public class Logique {
             isGameOver=true;
         }
 
+        else if (session.getPlayerCount()==2&&session.getPlayer(true).isRequestingDraw()&&session.getPlayer(false).isRequestingDraw()){
+            session.winType=7;
+            session.setVainqueur("nulle");
+            isGameOver=true;
+        }
+
         return isGameOver;
     }
 
@@ -374,8 +387,11 @@ public class Logique {
                     msg="Les noirs abandonnent";
                 }else if (session.getVainqueur().equals("noirs")) {
                     msg="Les blancs abandonnent";
-                    break;
                 }
+                break;
+            case 9:
+                msg="Timeout";
+                break;
         }
         return msg;
     }
@@ -475,12 +491,16 @@ public class Logique {
         for (LobbyPlayer lobbyPlayers: session.getPlayers()){
             Player joueur = lobbyPlayers.getPlayer();
             lobbyPlayers.setPlaying(true);
+            joueur.closeInventory();
             joueur.teleport(getLocationDecalee(session.getSessionId(),sessionSpawn));
             String colorMessage="Vous avez les "+getColorMessage(lobbyPlayers);
             joueur.sendMessage(ChatColor.LIGHT_PURPLE+"\nLa partie est commencée!\n"+colorMessage);
             joueur.sendTitle(ChatColor.GOLD+"Partie commencée!", colorMessage, 10, 60, 20);
             joueur.closeInventory();
             joueur.getInventory().remove(ItemManager.chessMenuButton);
+            joueur.getInventory().remove(ItemManager.porteQuitter);
+            joueur.getInventory().setItem(7,ItemManager.chessNulleItem);
+            joueur.getInventory().setItem(8,ItemManager.chessAbandonItems[0]);
             joueur.getInventory().setHeldItemSlot(0);
             joueur.setAllowFlight(true);
             joueur.setFlying(true);
@@ -488,6 +508,8 @@ public class Logique {
                 PlaySound.playStartGameSound(people.getPlayer());
             }
         }
+        session.startClockCountDown(session);
+        SB.redrawAllScoreBoard(session);
         session.drawBoards();
     }
 
@@ -497,6 +519,11 @@ public class Logique {
         session.over=true;
         broadcastEndGameMessage(session);
         for (LobbyPlayer people: session.getPlayers()){
+            people.getPlayer().closeInventory();
+            PlayerInventory inv =people.getPlayer().getInventory();
+            inv.remove(ItemManager.chessNulleItem);
+            inv.remove(ItemManager.chessAbandonItems[0]);
+            inv.setHeldItemSlot(0);
             PlaySound.playTaskSound(people.getPlayer());
         }
         new BukkitRunnable() {
@@ -506,6 +533,9 @@ public class Logique {
                     broadcastVictorySound(session);
                     broadcastVictoryMessage(session);
                     broadcastVictoryTitle(session);
+                    for (LobbyPlayer people:session.getPlayers()){
+                        people.getPlayer().getInventory().setItem(8,ItemManager.porteQuitter);
+                    }
                     cancel();
                     return;
                 }

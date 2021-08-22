@@ -4,6 +4,7 @@ import me.pepelucifer.echecs.chesslib.*;
 import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
+import me.pepelucifer.echecs.scoreboard.SB;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,9 +13,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 
@@ -154,7 +157,18 @@ public class Session{
     }
 
     public void jouer(String caseDebut,String caseFin){
-        String coup=caseDebut+caseFin;
+
+        String promotionPossible = "";                                                                //Gérer la promotion temporairement
+        Piece piecePromotionPossible=getEchiquier().getPiece(Square.valueOf(caseDebut));
+        if (piecePromotionPossible.getPieceType()!=null&&piecePromotionPossible.getPieceType().equals(PieceType.PAWN)){
+            Rank toSquareRank = Square.valueOf(caseFin).getRank();
+            if (toSquareRank.equals(Rank.RANK_8)&&getEchiquier().getSideToMove().equals(Side.WHITE)||
+                    toSquareRank.equals(Rank.RANK_1)&&getEchiquier().getSideToMove().equals(Side.BLACK)){
+                promotionPossible=PieceType.QUEEN.toString();
+            }
+        }                                                                                            //FIN gérer la promotion
+
+        String coup=caseDebut+caseFin+promotionPossible;
         setDernierClic(null);
         Move move;
         if (isTraitAuxBlancs()){
@@ -163,6 +177,7 @@ public class Session{
             move = new Move(coup,Side.BLACK);
         }
         if (isCoupLegal(move)){
+            resetDrawOffers(true);
             echiquier.doMove(move);
             drawBoards();
             redessinerCase(caseDebut,true);
@@ -183,6 +198,26 @@ public class Session{
             getPlayer(isTraitAuxBlancs()).getPlayer().sendMessage(ChatColor.RED+"Ce coup est illégal!");
             setDernierClic(null);
             redessinerCase(caseDebut,false);
+        }
+    }
+
+
+    public void resetDrawOffers(Boolean enFinDeCoup){
+        if (getWhite().isRequestingDraw()){
+            getWhite().getPlayer().sendMessage(ChatColor.RED+getBlack().getName()+" a refusé la nulle.");
+        }else if (getBlack().isRequestingDraw()){
+            getBlack().getPlayer().sendMessage(ChatColor.RED+getWhite().getName()+" a refusé la nulle.");
+        }
+
+        for (LobbyPlayer people:getPlayers()){
+            people.isRequestingDraw=false;
+            if (enFinDeCoup){
+                PlayerInventory inv=people.getPlayer().getInventory();
+                if (inv.getHeldItemSlot()==7){
+                    inv.setHeldItemSlot(6);
+                }
+                inv.setItem(7,ItemManager.chessNulleItem);
+            }
         }
     }
 
@@ -402,5 +437,40 @@ public class Session{
         ItemStack mapJaune=ItemManager.getChessPiece(indexNom,isPieceBlanc,isCaseBlanc,isCaseVide,isOverlayJaune);
         cadreBlanc.setItem(mapJaune);
         cadreNoir.setItem(mapJaune);
+    }
+
+
+    public void startClockCountDown(Session session){
+        new BukkitRunnable() {                                                //boucle pour rendre le reste du code synchrone, oui oui je sais c'est DÉGUEULASSE
+            LobbyPlayer white = getWhite();
+            LobbyPlayer black = getBlack();
+            int cpt=0;
+            public void run() {
+                if (!isOver()){
+                    cpt++;
+                    if (isTraitAuxBlancs()){
+                        white.timeLeft--;
+                    }else{
+                        black.timeLeft--;
+                    }
+                    if (cpt==5){
+                        SB.redrawAllScoreBoard(session);
+                        cpt=0;
+                    }
+                    if (white.getClockTime()<10){
+                        session.winType=9;
+                        setVainqueur("noirs");
+                        Logique.endGame(session);
+                    }else if (black.getClockTime()<20){
+                        winType=9;
+                        setVainqueur("blancs");
+                        Logique.endGame(session);
+                    }
+                }else{
+                    cancel();
+                    return;
+                }
+            }
+        }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 0L, 1L);
     }
 }

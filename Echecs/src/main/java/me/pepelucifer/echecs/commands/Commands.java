@@ -6,6 +6,7 @@ import me.pepelucifer.echecs.custommaps.TraceurImage;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
+import me.pepelucifer.echecs.objets.Request;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,7 +26,7 @@ public class Commands extends Logique implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             String cmd= command.getName().toLowerCase();
-            executeCommand(cmd,player);
+            executeCommand(cmd,player,args);
             return true;
         }else{
             sender.sendMessage(ChatColor.RED+"Seuls les joueurs ont accès a cette commande!");
@@ -33,7 +34,7 @@ public class Commands extends Logique implements CommandExecutor {
         }
     }
 
-    public void executeCommand(String cmd, Player player){
+    public void executeCommand(String cmd, Player player, String[] args){
         if (cmd.equals("echecs")){
             checkValidConnect(player);
         }else if (cmd.equals("quitter")){
@@ -50,6 +51,42 @@ public class Commands extends Logique implements CommandExecutor {
                 Bukkit.broadcastMessage("§2Mode développement activé.");
             }else{
                 Bukkit.broadcastMessage("§4Mode développement désactivé.");
+            }
+        }else if (cmd.equals("echecsaccept")){
+            if (args.length==0){
+                player.sendMessage(ChatColor.AQUA+"USAGE : /echecsaccepter [nom joueur]");
+            }
+            if (args.length==1){
+                if (isInLobby(player)){
+                    LobbyPlayer receiver = getLobbyPlayer(player);
+                    LobbyPlayer sender = getLobbyPlayer(args[0]);
+                    if (sender!=null && receiver!=null){
+                        Request request=receiver.getRequest(sender);
+                        if (request!=null && !request.isExpired()){
+                            Logique.lobby.checkStartSession(receiver,sender);
+                        }else{
+                            player.sendMessage(ChatColor.RED+"Cette requête est expirée");
+                        }
+                    }else{
+                        player.sendMessage(ChatColor.RED+"Joueur introuvable!");
+                    }
+                }
+            }
+        }else if (cmd.equals("echecsnulle")){
+            if (args.length==0){
+                player.sendMessage(ChatColor.AQUA+"USAGE : /echecsnulle [true/false]");
+            }
+            if (args.length==1){
+                if (isInLobby(player)){
+                    LobbyPlayer receiver = getLobbyPlayer(player);
+                    if (receiver!=null && receiver.isPlaying() && !receiver.getSession().isOver()){
+                        if (args[0].equals("true")){
+                            receiver.checkOfferDraw();
+                        }else if (args[0].equals("false")){
+                            receiver.getSession().resetDrawOffers(false);
+                        }
+                    }
+                }
             }
         }
     }

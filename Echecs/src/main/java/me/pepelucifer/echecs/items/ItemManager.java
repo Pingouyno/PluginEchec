@@ -26,8 +26,8 @@ public class ItemManager {
     public static ItemStack porteQuitter;
     public static ItemStack chessEmptySlot;
     public static ItemStack chessMenuButton;
-    public static ItemStack customMapBlanc;
-    public static ItemStack customMapNoir;
+    public static ItemStack[] chessAbandonItems = new ItemStack[3];
+    public static ItemStack chessNulleItem;
 
     public static ItemStack[] whiteChessPiecesWhiteSquare = new ItemStack[6];
     public static ItemStack[] whiteChessPiecesBlackSquare = new ItemStack[6];
@@ -45,6 +45,8 @@ public class ItemManager {
         createChessEmptySlotItem();
         createChessMenuButton();
         createChessPieces();
+        createChessAbandonItems();
+        createChessNulleItem();
     }
 
 
@@ -63,7 +65,7 @@ public class ItemManager {
         ItemStack item = new ItemStack(mats, 1);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(description);
-        meta.setLocalizedName("chess_0");
+        meta.setLocalizedName("chess_0_0");
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);
         chessEmptySlot=item;
@@ -73,7 +75,7 @@ public class ItemManager {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD+"Défier quelqu'un");
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setLocalizedName("chess_1");
+        meta.setLocalizedName("chess_0_1");
         item.setItemMeta(meta);
         chessMenuButton=item;
     }
@@ -84,13 +86,39 @@ public class ItemManager {
         meta.setOwningPlayer(Bukkit.getOfflinePlayer(player.getUniqueId()));
         meta.setDisplayName(ChatColor.GOLD+player.getName());
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.setLocalizedName("chess_2");
+        meta.setLocalizedName("chess_0_2");
         item.setItemMeta(meta);
         return item;
     }
 
+    public static void createChessAbandonItems(){
+        Material[] mats = {Material.MOJANG_BANNER_PATTERN,Material.SCUTE,Material.BARRIER};
+        String[] descript = {ChatColor.GOLD+"Abandonner",ChatColor.GREEN+"Confirmer",ChatColor.RED+"Annuler"};
+        for (int i=0;i<3;i++){
+            ItemStack item = new ItemStack(mats[i], 1);
+            ItemMeta meta=item.getItemMeta();
+            meta.setDisplayName(descript[i]);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+            meta.setLocalizedName("chess_1_"+i);
+            item.setItemMeta(meta);
+            chessAbandonItems[i]=item;
+        }
+    }
 
-    public static ItemStack getCustomMap(String nomImage, Boolean isCaseBlanc, Boolean isCaseVide, Boolean overlayJaune){                                     //On n'utilise pas celle-là durant la partie car elle prend trop de temps à dessiner
+    public static void createChessNulleItem(){
+        ItemStack item = new ItemStack(Material.POPPY, 1);
+        ItemMeta meta=item.getItemMeta();
+        meta.setDisplayName(ChatColor.BLUE+"Proposer la nulle");
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.setLocalizedName("chess_2");
+        item.setItemMeta(meta);
+        chessNulleItem=item;
+    }
+
+
+
+    private static ItemStack getCustomMap(String nomImage, Boolean isCaseBlanc, Boolean isCaseVide, Boolean overlayJaune){                                     //On n'utilise pas celle-là durant la partie car elle prend trop de temps à dessiner
         MapView view = Bukkit.createMap(Logique.chessWorld);
         view.getRenderers().clear();
         TraceurImage traceurImage = new TraceurImage(nomImage,isCaseBlanc,isCaseVide,overlayJaune);

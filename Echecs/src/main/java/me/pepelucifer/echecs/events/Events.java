@@ -26,7 +26,7 @@ public class Events extends EventLogique implements Listener{
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event){
         if (isInLobby(event.getWhoClicked())){
-            checkItemStack(event.getCurrentItem(),event.getWhoClicked());
+            checkItemStack(event.getCurrentItem(),getLobbyPlayer(event.getWhoClicked()));
             event.setCancelled(true);
         }
     }
@@ -37,8 +37,8 @@ public class Events extends EventLogique implements Listener{
         if (isInLobby(player)){
             event.setCancelled(true);
             LobbyPlayer lobbyPlayer = getLobbyPlayer(player);
-            if (player.getItemOnCursor()!=null){
-                checkItemStack(event.getItem(),event.getPlayer());
+            if (player.getItemInHand()!=null && player.getItemInHand().getItemMeta()!=null){
+                checkItemStack(event.getItem(),lobbyPlayer);
             }else{
                 if (lobbyPlayer.isPlaying()){
                     Block block=player.getTargetBlockExact(50);
@@ -64,19 +64,6 @@ public class Events extends EventLogique implements Listener{
         }else if (Logique.isEnModeDeveloppement){
             String coup = event.getMessage();
             Logique.devJouerCoup(coup);
-        }else{
-            new BukkitRunnable() {                                                //boucle pour rendre le reste du code synchrone, oui oui je sais c'est DÉGUEULASSE
-                int time=0;
-                public void run() {
-                    if (time==1){
-                        //event.getPlayer().getInventory().setItem(0, ItemManager.getChessPiece(0,true,false,false,true));
-                        //event.getPlayer().sendMessage(Square.squareAt(Integer.valueOf(event.getMessage())).toString());
-                        cancel();
-                        return;
-                    }
-                    time++;
-                }
-            }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 1L, 20L);
         }
     }
 

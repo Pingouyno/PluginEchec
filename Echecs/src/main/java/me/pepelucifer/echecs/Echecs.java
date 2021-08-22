@@ -4,10 +4,13 @@ import me.pepelucifer.echecs.commands.Commands;
 import me.pepelucifer.echecs.events.Events;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
-import me.pepelucifer.echecs.objets.LobbyPlayer;
-import me.pepelucifer.echecs.objets.Session;
+import net.minecraft.server.v1_16_R2.ChatMessageType;
+import net.minecraft.server.v1_16_R2.IChatBaseComponent;
+import net.minecraft.server.v1_16_R2.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Echecs extends JavaPlugin {
@@ -20,9 +23,12 @@ public final class Echecs extends JavaPlugin {
         getCommand("echecs").setExecutor(new Commands());
         getCommand("quitter").setExecutor(new Commands());
         getCommand("dev").setExecutor(new Commands());
+        getCommand("echecsaccept").setExecutor(new Commands());
+        getCommand("echecsnulle").setExecutor(new Commands());
         ItemManager.init();
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"Plugin Echecs demarre.");
     }
+
 
     @Override
     public void onDisable() {

@@ -1,6 +1,7 @@
 package me.pepelucifer.echecs.objets;
 import me.pepelucifer.echecs.Echecs;
 import me.pepelucifer.echecs.logique.Logique;
+import me.pepelucifer.echecs.scoreboard.SB;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -38,6 +39,10 @@ public final class Lobby{
         return playingPlayerList;
     }
 
+    public int getTotalPlayerCount(){
+        return (getPlayingPlayers().size()+getWaitingPlayers().size());
+    }
+
     public World getWorld(){
         return world;
     }
@@ -46,19 +51,31 @@ public final class Lobby{
         return spawn;
     }
 
-    private int trouverCompteurValeurBasse(){
-        int pointeurSession=0;
-        if (getSessions().size()==0){
+    private int trouverCompteurValeurBasse() {
+        int pointeurSession = 0;
+        if (getSessions().size() == 0) {
             return pointeurSession;
-        }else{
-            while (true){                                                                                                       //Pas sécuritaire mais ne devrait jamais causer de problèmes
-                for (Session session:getSessions()){
-                    if (session.getSessionId()==count){
+        } else {
+            while (true) {                                                                                                       //Pas sécuritaire mais ne devrait jamais causer de problèmes
+                for (Session session : getSessions()) {
+                    if (session.getSessionId() == count) {
                         pointeurSession++;
                         continue;
                     }
                     return pointeurSession;
                 }
+            }
+        }
+    }
+
+    public void checkStartSession(LobbyPlayer p1, LobbyPlayer p2){
+        if (p1!=null && p1!=null){
+            if (p1!=p2){
+                if (!p1.isInSession() && !p1.isInSession()){
+                    startSession(p1,p2);
+                }
+            }else{
+                Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE+"ERREUR : Le jeu a tenté d'apparier un joueur avec soi-même.");
             }
         }
     }
@@ -74,6 +91,7 @@ public final class Lobby{
         }
         count++;
         Logique.startGame(session);
+        SB.redrawAllScoreBoard(this);
     }
 
     public void endSession(Session session){

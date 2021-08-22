@@ -17,3 +17,9 @@ commands:
     description: Propriétés spéciales pour développement
     usage: /<command>
     aliases: d
+  echecsaccept:
+    description: Accepter une requête d'échecs
+    usage: /<command> <args>
+  echecsnulle:
+    description: Accepter ou refuser la nulle
+    usage: /<command> <args>
