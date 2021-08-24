@@ -20,7 +20,7 @@ public class SB extends Logique {
         Scoreboard board = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
         Objective objective = board.registerNewObjective("test", "dummy", "hey");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        objective.setDisplayName("§a»» §dÉchecs §a«");
+        objective.setDisplayName(ChatColor.GOLD+"§a» §dÉchecs §a«");
         return board;
     }
 

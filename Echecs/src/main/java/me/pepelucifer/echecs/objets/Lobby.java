@@ -66,9 +66,9 @@ public final class Lobby{
         } else {
             while (true) {                                                                                                       //Pas sécuritaire mais ne devrait jamais causer de problèmes
                 for (Session session : getSessions()) {
-                    if (session.getSessionId() == count) {
+                    if (session.getSessionId() == pointeurSession) {
                         pointeurSession++;
-                        continue;
+                        break;
                     }
                     return pointeurSession;
                 }
