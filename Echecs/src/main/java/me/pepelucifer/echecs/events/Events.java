@@ -1,8 +1,5 @@
 package me.pepelucifer.echecs.events;
 
-import me.pepelucifer.echecs.chesslib.Square;
-import me.pepelucifer.echecs.items.ItemManager;
-import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -28,6 +25,15 @@ public class Events extends EventLogique implements Listener{
         if (isInLobby(event.getWhoClicked())){
             checkItemStack(event.getCurrentItem(),getLobbyPlayer(event.getWhoClicked()));
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public void onPlayerTeleport(PlayerTeleportEvent event){
+        if (!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
+            if (isNameInLobby(event.getPlayer().getName())){
+                disconnectPlayer(getLobbyPlayer(event.getPlayer()));
+            }
         }
     }
 
@@ -58,12 +64,9 @@ public class Events extends EventLogique implements Listener{
         if (isInLobby(event.getPlayer())){
             LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
             if(lobbyPlayer.isPlaying()){
-                //event.setCancelled(true);                                                                         À REMETTRE DANS LA VERSION M2C
-                //lobbyPlayer.getSession().messageJoueurs(event.getMessage());
+                event.setCancelled(true);
+                lobbyPlayer.getSession().messageJoueurs(event.getMessage());
             }
-        }else if (Logique.isEnModeDeveloppement){
-            String coup = event.getMessage();
-            Logique.devJouerCoup(coup);
         }
     }
 

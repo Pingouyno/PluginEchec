@@ -40,17 +40,19 @@ public class Commands extends Logique implements CommandExecutor {
         }else if (cmd.equals("quitter")){
             checkValidDisconnect(player);
         }else if (cmd.equals("dev")){
-            Logique.isEnModeDeveloppement=!isEnModeDeveloppement;
+            isEnDebugging=!isEnDebugging;
             if (isInLobby(player)){
                 LobbyPlayer lobbyPlayer=getLobbyPlayer(player);
                 if (lobbyPlayer.isPlaying()){
-                    lobbyPlayer.getSession().testResetPanneauEchiquiers(isEnModeDeveloppement);
+                    lobbyPlayer.getSession().testResetPanneauEchiquiers(isEnDebugging);
                 }
             }
-            if (isEnModeDeveloppement){
-                Bukkit.broadcastMessage("§2Mode développement activé.");
+            if (isEnDebugging){
+                Logique.lobby.despawnDummyBoards();
+                Bukkit.broadcastMessage("§2Mode débug activé.");
             }else{
-                Bukkit.broadcastMessage("§4Mode développement désactivé.");
+                Logique.lobby.spawnDummyBoards();
+                Bukkit.broadcastMessage("§4Mode débug désactivé.");
             }
         }else if (cmd.equals("echecsaccept")){
             if (args.length==0){

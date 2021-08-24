@@ -4,6 +4,9 @@ main: me.pepelucifer.echecs.Echecs
 api-version: 1.16
 authors: [ pepelucifer, clement_du_57 ]
 description: Un plugin qui permet de jouer aux échecs sur Minecraft.
+softdepend: [Multiverse-Core,ExtraWorlds,AmongUs]
+
+
 commands:
   echecs:
     description: Rejoindre un salon d'échecs

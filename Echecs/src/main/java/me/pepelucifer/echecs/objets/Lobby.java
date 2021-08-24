@@ -1,14 +1,21 @@
 package me.pepelucifer.echecs.objets;
 import me.pepelucifer.echecs.Echecs;
+import me.pepelucifer.echecs.chesslib.Square;
+import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.scoreboard.SB;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public final class Lobby{
     Location spawn;
@@ -17,6 +24,7 @@ public final class Lobby{
     ArrayList<Session> sessionList;
     ArrayList<LobbyPlayer> waitingPlayerList;
     ArrayList<LobbyPlayer> playingPlayerList;
+    UUID[] cadresUUIDs = new UUID[52];                                                                              //peut causer des erreur si on ajoute une pièce
 
     public Lobby(){
         this.world= Logique.chessWorld;
@@ -104,5 +112,81 @@ public final class Lobby{
         }
         session.retirerCadres();
         getSessions().remove(session);
+    }
+
+
+    public void updeateDummyBoards(){
+        for (UUID uuid:cadresUUIDs){
+            ItemFrame cadre = (ItemFrame) Bukkit.getEntity(uuid);
+            cadre.setItem(cadre.getItem());
+        }
+    }
+
+    public void despawnDummyBoards(){
+        for (UUID uuid:cadresUUIDs){
+            Bukkit.getEntity(uuid).remove();
+        }
+    }
+
+
+    public void spawnDummyBoardLater(){
+        new BukkitRunnable() {
+            int time = 1;
+            public void run() {
+                if (time == 0) {
+                    spawnDummyBoards();
+                    cancel();
+                    return;
+                }
+                time--;
+            }
+        }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 0L, 20L);
+    }
+
+
+    public void spawnDummyBoards(){
+        ItemStack[][] allpieces = {ItemManager.whiteChessPiecesWhiteSquare,ItemManager.whiteChessPiecesBlackSquare,ItemManager.blackChessPiecesWhiteSquare,
+                ItemManager.blackChessPiecesBlackSquare,ItemManager.whiteChessPiecesWhiteSquareYellow,ItemManager.whiteChessPiecesBlackSquareYellow,ItemManager.blackChessPiecesWhiteSquareYellow,
+                ItemManager.blackChessPiecesBlackSquareYellow,ItemManager.emptySquares,ItemManager.emptySquaresYellow};
+        Location caseCourante=Logique.premiereCaseDummyBoard.clone();
+        int cpt = 0;
+        for (ItemStack[] itemList:allpieces){
+            for (ItemStack piece:itemList){
+                spawnCadreCaseCourante(caseCourante,cpt,piece);
+                cpt++;
+                decalerDummyCadreNorth(caseCourante,cpt);
+            }
+        }
+    }
+
+
+    private void spawnCadreCaseCourante(Location caseCourante, int cpt, ItemStack piece){
+        Block bloc = getWorld().getBlockAt(caseCourante.getBlockX(),caseCourante.getBlockY(),caseCourante.getBlockZ()-1);                           //NORTH
+        //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX()+1,caseCourante.getBlockY(),caseCourante.getBlockZ());                           //EAST
+        //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX()-1,caseCourante.getBlockY(),caseCourante.getBlockZ());                           //WEST
+        //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX(),caseCourante.getBlockY(),caseCourante.getBlockZ()+1);                           //SOUTH
+        bloc.setType(Material.STONE);
+        Entity cadre=getWorld().spawnEntity(caseCourante, EntityType.ITEM_FRAME);
+        cadresUUIDs[cpt] = cadre.getUniqueId();
+        ItemFrame frame = (ItemFrame) cadre;
+        frame.setVisible(false);
+        frame.setItem(piece);
+        frame.setFacingDirection(BlockFace.SOUTH);                                                                                          //doit être inverse de la direction en haut
+    }
+
+    private void decalerDummyCadreWest(Location caseCourante, int cpt){
+        if (cpt%13==0 && cpt!=0){
+            caseCourante.add(0,-1,12);
+        }else{
+            caseCourante.add(0,0,-1);
+        }
+    }
+
+    private void decalerDummyCadreNorth(Location caseCourante, int cpt){
+        if (cpt%13==0 && cpt!=0){
+            caseCourante.add(-12,-1,0);
+        }else{
+            caseCourante.add(1,0,0);
+        }
     }
 }

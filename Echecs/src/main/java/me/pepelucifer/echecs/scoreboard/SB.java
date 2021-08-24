@@ -21,8 +21,8 @@ public class SB extends Logique {
         Objective objective = board.registerNewObjective("test", "dummy", "hey");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatColor.GOLD+"» §dÉchecs §a«");
-    return board;
-}
+        return board;
+    }
 
     public static void redrawAllScoreBoard(Lobby lobby) {
         for (LobbyPlayer people:lobby.getWaitingPlayers()){
@@ -62,8 +62,9 @@ public class SB extends Logique {
         Lobby lobby = Logique.lobby;
         resetBoard(board);
 
-        obj.getScore("§1").setScore(2);
-        obj.getScore("§3Taille du salon : " + "[§b"+lobby.getWaitingPlayers().size()+ChatColor.WHITE+"§3]").setScore(1);
+        obj.getScore("§1").setScore(3);
+        obj.getScore("§3Nombres de joueurs : " + "[§a"+lobby.getWaitingPlayers().size()+ChatColor.WHITE+"§3]").setScore(2);
+        obj.getScore("§3Parties en cours : " + "[§a"+lobby.getSessions().size()+ChatColor.WHITE+"§3]").setScore(1);
         lobbyPlayer.getPlayer().setScoreboard(board);
     }
 

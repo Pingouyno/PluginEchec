@@ -4,13 +4,7 @@ import me.pepelucifer.echecs.commands.Commands;
 import me.pepelucifer.echecs.events.Events;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.logique.Logique;
-import net.minecraft.server.v1_16_R2.ChatMessageType;
-import net.minecraft.server.v1_16_R2.IChatBaseComponent;
-import net.minecraft.server.v1_16_R2.PacketPlayOutChat;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Echecs extends JavaPlugin {
@@ -18,7 +12,6 @@ public final class Echecs extends JavaPlugin {
     @Override
     public void onEnable() {
         Logique.init();
-        Logique.pluginFolder=this.getDataFolder().getAbsolutePath();
         getServer().getPluginManager().registerEvents(new Events(),this);
         getCommand("echecs").setExecutor(new Commands());
         getCommand("quitter").setExecutor(new Commands());
@@ -26,6 +19,7 @@ public final class Echecs extends JavaPlugin {
         getCommand("echecsaccept").setExecutor(new Commands());
         getCommand("echecsnulle").setExecutor(new Commands());
         ItemManager.init();
+        Logique.lobby.spawnDummyBoardLater();
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"Plugin Echecs demarre.");
     }
 
@@ -42,6 +36,7 @@ public final class Echecs extends JavaPlugin {
             Logique.lobby.getPlayingPlayers().get(0).getSession().locked=true;
             Logique.disconnectPlayer(Logique.lobby.getPlayingPlayers().get(0));
         }
+        Logique.lobby.despawnDummyBoards();
         getServer().getConsoleSender().sendMessage(ChatColor.RED+"Plugin Echecs arrete.");
     }
 }

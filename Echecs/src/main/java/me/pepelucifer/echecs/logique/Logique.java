@@ -1,32 +1,25 @@
 package me.pepelucifer.echecs.logique;
 import me.pepelucifer.echecs.chesslib.*;
-import me.pepelucifer.echecs.chesslib.move.Move;
 import me.pepelucifer.echecs.items.ItemManager;
 import me.pepelucifer.echecs.objets.Lobby;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import me.pepelucifer.echecs.objets.Session;
 import me.pepelucifer.echecs.scoreboard.SB;
 import me.pepelucifer.echecs.sons.PlaySound;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Logique {
-
     public static World chessWorld;
     public static World spawnWorld;
     public static Location lobbySpawn;
@@ -34,72 +27,47 @@ public class Logique {
     public static Location sessionSpawn;
     public static String chessWorldName;
     public static String spawnWorldName;
-
-    public static Lobby lobby;
-    public static int decalage;
-
     public static Location premiereCaseUniverselleBlanc;
     public static Location premiereCaseUniverselleNoir;
-    public static boolean isEnModeDeveloppement;
-    public static Board devBoard;
-    public static boolean devBoardTraitAuxBlancs;
-    public static String pluginFolder;
+    public static Location premiereCaseDummyBoard;                                                                      //Pour la collection de pièces qu'on va afficher dans le lobby
+
+    public static boolean isEnDebugging;
+    public static Lobby lobby;
+    public static int decalage;
+    public static Scoreboard globalScoreBoard;
+
+    public static boolean modeTest=false;                                                                            //CETTE BOOLÉENNE INDIQUE SI POUR MONDE TEST OU M2C!!!
+
 
     public static void init(){
-        chessWorld = Bukkit.getWorlds().get(0);
-        spawnWorld = Bukkit.getWorlds().get(0);
-        lobbySpawn = new Location(chessWorld,86.5,86.5,303);
-        worldSpawn = spawnWorld.getSpawnLocation();
-        sessionSpawn = new Location(chessWorld,101.5,86.5,303.5);
-        spawnWorldName=spawnWorld.getName();
-        chessWorldName=chessWorld.getName();
-        isEnModeDeveloppement=false;
-        premiereCaseUniverselleBlanc = new Location(chessWorld,106,94,294);
-        premiereCaseUniverselleNoir = new Location(chessWorld,106,94,305);
-
+        if (modeTest){
+            chessWorld = Bukkit.getWorlds().get(0);
+            spawnWorld = Bukkit.getWorlds().get(0);
+            lobbySpawn = new Location(chessWorld,86.5,86.5,303);
+            worldSpawn = spawnWorld.getSpawnLocation();
+            sessionSpawn = new Location(chessWorld,101.5,86.5,303.5);
+            spawnWorldName=spawnWorld.getName();
+            chessWorldName=chessWorld.getName();
+            premiereCaseUniverselleBlanc = new Location(chessWorld,106,95,294);
+            premiereCaseUniverselleNoir = new Location(chessWorld,106,95,305);
+            premiereCaseDummyBoard = new Location(chessWorld,70,94,305);
+            decalage = 14;
+        }else{
+            spawnWorldName="Spawn";
+            chessWorldName="echecs";
+            spawnWorld = Bukkit.getWorld(spawnWorldName);
+            chessWorld = Bukkit.getWorld(chessWorldName);
+            lobbySpawn = new Location(chessWorld,167.5,4,-192.5);
+            worldSpawn = spawnWorld.getSpawnLocation();
+            sessionSpawn = new Location(chessWorld,240,4,-183);
+            premiereCaseUniverselleBlanc = new Location(chessWorld,248,11,-191);
+            premiereCaseUniverselleNoir = new Location(chessWorld,248,11,-179);
+            premiereCaseDummyBoard = new Location(chessWorld,161,8,-203);                                        //Emplacement premiere case pour spritesheet du lobby
+            decalage = 100;
+        }
         lobby = new Lobby();
-        decalage = 14;
-        devBoard=new Board();
-        devBoardTraitAuxBlancs=true;
-    }
-
-
-    public static void devJouerCoup(String coup){
-        Move move;
-        if (devBoardTraitAuxBlancs){
-            move = new Move(coup, Side.WHITE);
-        }else{
-            move = new Move(coup,Side.BLACK);
-        }
-        if (isCoupCompletementCalissementValide(move)){
-            devBoard.doMove(move,false);
-            devBoardTraitAuxBlancs=!devBoardTraitAuxBlancs;
-            Bukkit.broadcastMessage(devBoard.toString());
-        }
-
-    }
-
-    public static boolean isCoupCompletementCalissementValide(Move move){
-        Bukkit.broadcastMessage("\n|\n|\n|\n|\n|\n|\n|\n|COUPS LÉGAUX : "+devBoard.legalMoves().toString()+
-                "\n|");
-
-        int cpt=0;
-        if (devBoard.legalMoves().contains(move)){
-            Bukkit.broadcastMessage("\n§aListe coups légaux contient votre coup");
-            cpt++;
-        }
-        /*
-        if (devBoard.isMoveLegal(move,true)){
-            Bukkit.broadcastMessage("§aMéthode vérification contient votre coup");
-            cpt++;
-        }*/
-        if (cpt==1){
-            Bukkit.broadcastMessage("§aCoup complètement valide!");
-            return true;
-        }else{
-            Bukkit.broadcastMessage("§4Coup invalide ; non joué dans le board virtuel");
-        }
-        return false;
+        globalScoreBoard = Bukkit.getServer().getScoreboardManager().getMainScoreboard();
+        isEnDebugging=false;
     }
 
 
@@ -119,15 +87,33 @@ public class Logique {
         }
     }
 
-    public static boolean isInLobby(Player player){
-        /*
-        if (player.getWorld().getName().equals(getWorld().getName())){                          //Ce code est plus performant, mais n'est pas fonctionnel avec le serveur test. On va l'intégrer dans M2C.
+    public static boolean isInLobby(Player player){                                                            //Vérifier le nom du monde uniquement est plus rapide, mais n'est pas convenable dans le serveur test
+        if (modeTest || isEnDebugging){
+            return isNameInLobby(player.getName());
+        }else{
+            return isPlayerInLobby(player.getWorld().getName());
+        }
+    }
+
+    public static boolean isInLobby(HumanEntity player){
+        if (modeTest || isEnDebugging){
+            return isNameInLobby(player.getName());
+        }else{
+            return isPlayerInLobby(player.getWorld().getName());
+        }
+    }
+
+
+    public static boolean isPlayerInLobby(String worldName){
+        if (worldName.equals(Logique.chessWorldName)){
             return true;
         }else{
             return false;
         }
-         */
-        String name=player.getName();
+
+    }
+
+    public static boolean isNameInLobby(String name){
         for (LobbyPlayer joueurs:lobby.getPlayingPlayers()){
             if (joueurs.getName().equals(name)){
                 return true;
@@ -141,27 +127,6 @@ public class Logique {
         return false;
     }
 
-    public boolean isInLobby(HumanEntity player){
-        /*
-        if (player.getWorld().getName().equals(getWorld().getName())){                          //Ce code est plus performant, mais n'est pas fonctionnel avec le serveur test. On va l'intégrer dans M2C.
-            return true;
-        }else{
-            return false;
-        }
-         */
-        String name=player.getName();
-        for (LobbyPlayer joueurs:lobby.getPlayingPlayers()){
-            if (joueurs.getName().equals(name)){
-                return true;
-            }
-        }
-        for (LobbyPlayer joueurs:lobby.getWaitingPlayers()){
-            if (joueurs.getName().equals(name)){
-                return true;
-            }
-        }
-        return false;
-    }
 
     public LobbyPlayer getLobbyPlayer(HumanEntity player){
         return privateFindLobbyPlayer(player.getName());
@@ -175,7 +140,7 @@ public class Logique {
         return privateFindLobbyPlayer(nomJoueur);
     }
 
-    private LobbyPlayer privateFindLobbyPlayer(String nomJoueur){                                            //Pour raison de propreté, ne pas appeler directement cette méthode
+    private LobbyPlayer privateFindLobbyPlayer(String nomJoueur){
         for (LobbyPlayer joueur:lobby.getWaitingPlayers()){
             if (joueur.getName().equals(nomJoueur)){
                 return joueur;
@@ -238,15 +203,17 @@ public class Logique {
             PlaySound.playVotingSound(people.getPlayer());
         }
         SB.redrawAllScoreBoard(lobby);
+        //lobby.updateDummyBoards();                                                                                                //peut-être pas nécessaire finalement
     }
 
     public static void disconnectPlayer(LobbyPlayer lobbyPlayer){
         Player player=lobbyPlayer.getPlayer();
         player.closeInventory();
         player.getInventory().clear();
-        //player.setFlying(false);                                                                                                   //REMETTRE CES LIGNES AVANT MISE EN PROD
-        //player.setAllowFlight(false);
-        player.teleport(worldSpawn);
+        if (!player.getGameMode().equals(GameMode.CREATIVE)){
+            player.setFlying(false);
+            player.setAllowFlight(false);
+        }
         player.getInventory().removeItem(ItemManager.porteQuitter);
         player.getInventory().removeItem(ItemManager.chessMenuButton);
         broadcastDisconnectMessage(lobbyPlayer);
@@ -262,7 +229,9 @@ public class Logique {
                 lobby.endSession(lobbyPlayer.getSession());
             }
         }
+        player.setScoreboard(globalScoreBoard);
         SB.redrawAllScoreBoard(lobby);
+        player.teleport(worldSpawn);
     }
 
     public static Location getLocationDecalee(int count, Location location){
@@ -278,7 +247,7 @@ public class Logique {
     }
 
     public static void checkGameEnd(Session session){
-        if (session.isStarted() && !session.isLocked() && !session.isOver()){                                                                            //Changer éventuellement le fonctionnement
+        if (session.isStarted() && !session.isLocked() && !session.isOver()){
             if (isGameOver(session)){
                 endGame(session);
             }

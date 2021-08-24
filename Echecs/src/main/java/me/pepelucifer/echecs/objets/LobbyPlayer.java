@@ -135,7 +135,7 @@ public class LobbyPlayer{
         TextComponent tc2 = new TextComponent();
         tc2.setText(ChatColor.GREEN+"[Accepter]");
         tc2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,cmd));
-        tc2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquer pour accepter").create()));
+        tc2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquez pour accepter").create()));
         tc.addExtra(tc2);
         receiver.getPlayer().spigot().sendMessage(ChatMessageType.CHAT,tc);
         getPlayer().sendMessage(ChatColor.GOLD+"Vous avez envoyé un défi à "+ChatColor.BLUE+receiver.getName()+".");
@@ -151,7 +151,7 @@ public class LobbyPlayer{
         TextComponent tc2 = new TextComponent();
         tc2.setText(ChatColor.GREEN+"[Accepter]");
         tc2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,cmdAccept));
-        tc2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquer pour accepter").create()));
+        tc2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquez pour accepter").create()));
         tc.addExtra(tc2);
 
         TextComponent tc3 = new TextComponent();
@@ -161,7 +161,7 @@ public class LobbyPlayer{
         TextComponent tc4 = new TextComponent();
         tc4.setText(ChatColor.RED+"[Refuser]");
         tc4.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,cmdRefuser));
-        tc4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquer pour refuser").create()));
+        tc4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Cliquez pour refuser").create()));
         tc.addExtra(tc4);
 
         receiver.getPlayer().spigot().sendMessage(ChatMessageType.CHAT,tc);
@@ -194,10 +194,10 @@ public class LobbyPlayer{
         Logique.checkGameEnd(session);
         if (!getSession().isOver()){
             for (LobbyPlayer people:getSession().getPlayers()){
-                if (people.equals(this)){
-                    people.getPlayer().sendMessage(ChatColor.GOLD+"Vous avez offert la nulle à "+ChatColor.BLUE+getName()+".");
-                }else{
+                if (!people.equals(this)){
+                    getPlayer().sendMessage(ChatColor.GOLD+"Vous avez offert la nulle à "+ChatColor.BLUE+people.getName()+".");
                     sendDrawRequestMessage(people);
+                    break;
                 }
             }
         }

@@ -61,7 +61,7 @@ public class Session{
         this.cadresUUIDsBlancs=new UUID[64];
         this.cadresUUIDsNoirs=new UUID[64];
         this.derniereCaseCliquee=null;
-        if (!Logique.isEnModeDeveloppement){                                                        //Enlever le IF
+        if (!Logique.isEnDebugging){
             initialiserCadresEtBlocs();
         }
     }

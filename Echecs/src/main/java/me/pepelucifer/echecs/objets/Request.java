@@ -37,13 +37,15 @@ public class Request {
         return receiver;
     }
 
+    public Request getRequest(){ return this; }
+
     private void startExpirationCountDown(){
         new BukkitRunnable() {
             public void run() {
                 if (timer == 0) {
                     setExpired(true);
-                    getReceiver().getInRequests().remove(this);
-                    getSender().getOutRequests().remove(this);
+                    getReceiver().getInRequests().remove(getRequest());
+                    getSender().getOutRequests().remove(getRequest());
                     cancel();
                     return;
                 }
