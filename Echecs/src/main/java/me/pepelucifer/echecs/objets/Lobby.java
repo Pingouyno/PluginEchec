@@ -134,7 +134,13 @@ public final class Lobby{
             int time = 1;
             public void run() {
                 if (time == 0) {
-                    spawnDummyBoards();
+                    try{
+                        spawnDummyBoards();
+                    }catch (Exception e){
+                        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"ERREUR DANS LA CRÉATION D'UN TABLEAU DE CADRES!");
+                        cancel();
+                        return;
+                    }
                     cancel();
                     return;
                 }

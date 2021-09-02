@@ -19,7 +19,7 @@ public final class Echecs extends JavaPlugin {
         getCommand("echecsaccept").setExecutor(new Commands());
         getCommand("echecsnulle").setExecutor(new Commands());
         ItemManager.init();
-        Logique.lobby.spawnDummyBoardLater();
+        Logique.lobby.spawnDummyBoards();
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN+"Plugin Echecs demarre.");
     }
 

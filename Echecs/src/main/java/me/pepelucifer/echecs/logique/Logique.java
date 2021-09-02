@@ -59,7 +59,7 @@ public class Logique {
             chessWorld = Bukkit.getWorld(chessWorldName);
             lobbySpawn = new Location(chessWorld,167.5,4,-192.5);
             worldSpawn = spawnWorld.getSpawnLocation();
-            sessionSpawn = new Location(chessWorld,240,4,-183);
+            sessionSpawn = new Location(chessWorld,240,6,-183);
             premiereCaseUniverselleBlanc = new Location(chessWorld,248,11,-191);
             premiereCaseUniverselleNoir = new Location(chessWorld,248,11,-179);
             premiereCaseDummyBoard = new Location(chessWorld,161,8,-203);                                        //Emplacement premiere case pour spritesheet du lobby

@@ -40,8 +40,8 @@ public class Commands extends Logique implements CommandExecutor {
         }else if (cmd.equals("quitter")){
             checkValidDisconnect(player);
         }else if (cmd.equals("dev")){
-            isEnDebugging=!isEnDebugging;
-            if (isInLobby(player)){
+            if (player.isOp()&&isInLobby(player)){
+                isEnDebugging=!isEnDebugging;
                 LobbyPlayer lobbyPlayer=getLobbyPlayer(player);
                 if (lobbyPlayer.isPlaying()){
                     lobbyPlayer.getSession().testResetPanneauEchiquiers(isEnDebugging);
