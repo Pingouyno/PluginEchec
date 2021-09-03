@@ -25,6 +25,7 @@ public final class Lobby{
     ArrayList<LobbyPlayer> waitingPlayerList;
     ArrayList<LobbyPlayer> playingPlayerList;
     UUID[] cadresUUIDs = new UUID[52];                                                                              //peut causer des erreur si on ajoute une pièce
+    public static boolean firstTime;
 
     public Lobby(){
         this.world= Logique.chessWorld;
@@ -33,6 +34,7 @@ public final class Lobby{
         this.sessionList=new ArrayList<Session>();
         this.waitingPlayerList=new ArrayList<LobbyPlayer>();
         this.playingPlayerList=new ArrayList<LobbyPlayer>();
+        this.firstTime=true;
     }
 
     public ArrayList<Session> getSessions(){
@@ -115,7 +117,7 @@ public final class Lobby{
     }
 
 
-    public void updeateDummyBoards(){
+    public void updateDummyBoards(){
         for (UUID uuid:cadresUUIDs){
             ItemFrame cadre = (ItemFrame) Bukkit.getEntity(uuid);
             cadre.setItem(cadre.getItem());
@@ -129,28 +131,20 @@ public final class Lobby{
     }
 
 
-    public void spawnDummyBoardLater(){
-        new BukkitRunnable() {
-            int time = 1;
-            public void run() {
-                if (time == 0) {
-                    try{
-                        spawnDummyBoards();
-                    }catch (Exception e){
-                        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"ERREUR DANS LA CRÉATION D'UN TABLEAU DE CADRES!");
-                        cancel();
-                        return;
-                    }
-                    cancel();
-                    return;
+    public void clearAllDummyBoards(){                                                                                  //N'a pas besoin du uuid MAIS ne peut qu'être exécuté que lorsque le chunk en question est chargé
+        for (Entity e:getWorld().getEntities()){
+            if (e instanceof  ItemFrame){
+                ItemFrame cadre = (ItemFrame) e;
+                if (cadre.getCustomName()!=null && cadre.getCustomName().equals("dummy")){
+                    e.remove();
                 }
-                time--;
             }
-        }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 0L, 20L);
+        }
     }
 
 
     public void spawnDummyBoards(){
+        clearAllDummyBoards();
         ItemStack[][] allpieces = {ItemManager.whiteChessPiecesWhiteSquare,ItemManager.whiteChessPiecesBlackSquare,ItemManager.blackChessPiecesWhiteSquare,
                 ItemManager.blackChessPiecesBlackSquare,ItemManager.whiteChessPiecesWhiteSquareYellow,ItemManager.whiteChessPiecesBlackSquareYellow,ItemManager.blackChessPiecesWhiteSquareYellow,
                 ItemManager.blackChessPiecesBlackSquareYellow,ItemManager.emptySquares,ItemManager.emptySquaresYellow};
@@ -166,14 +160,20 @@ public final class Lobby{
     }
 
 
-    private void spawnCadreCaseCourante(Location caseCourante, int cpt, ItemStack piece){
+    private void spawnBlocDerriereCadre(Location caseCourante,Material materiau){
         Block bloc = getWorld().getBlockAt(caseCourante.getBlockX(),caseCourante.getBlockY(),caseCourante.getBlockZ()-1);                           //NORTH
         //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX()+1,caseCourante.getBlockY(),caseCourante.getBlockZ());                           //EAST
         //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX()-1,caseCourante.getBlockY(),caseCourante.getBlockZ());                           //WEST
         //Block bloc = getWorld().getBlockAt(caseCourante.getBlockX(),caseCourante.getBlockY(),caseCourante.getBlockZ()+1);                           //SOUTH
-        bloc.setType(Material.STONE);
+        bloc.setType(materiau);
+    }
+
+
+    private void spawnCadreCaseCourante(Location caseCourante, int cpt, ItemStack piece){
+        spawnBlocDerriereCadre(caseCourante,Material.STONE);
         Entity cadre=getWorld().spawnEntity(caseCourante, EntityType.ITEM_FRAME);
         cadresUUIDs[cpt] = cadre.getUniqueId();
+        cadre.setCustomName("dummy");
         ItemFrame frame = (ItemFrame) cadre;
         frame.setVisible(false);
         frame.setItem(piece);

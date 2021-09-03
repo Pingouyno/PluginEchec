@@ -190,6 +190,12 @@ public class Logique {
 
     public void connectPlayer(Player player){
         player.teleport(lobbySpawn);
+
+        if (lobby.firstTime){                                                                                                        //Car on doit attendre que les chunks des cadres soient chargés
+            lobby.spawnDummyBoards();
+            lobby.firstTime=false;
+        }
+
         player.getInventory().clear();
         player.getInventory().setItem(8,ItemManager.porteQuitter);
         player.getInventory().setItem(0,ItemManager.chessMenuButton);
