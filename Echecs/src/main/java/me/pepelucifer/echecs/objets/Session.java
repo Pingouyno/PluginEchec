@@ -61,9 +61,7 @@ public class Session{
         this.cadresUUIDsBlancs=new UUID[64];
         this.cadresUUIDsNoirs=new UUID[64];
         this.derniereCaseCliquee=null;
-        if (!Logique.isEnDebugging){
-            initialiserCadresEtBlocs();
-        }
+        initialiserCadresEtBlocs();
     }
 
     public boolean isTraitAuxBlancs(){
@@ -340,13 +338,14 @@ public class Session{
         Location caseCouranteBlancs=premiereCaseBlanc.clone().add(0,-7,0);
         Location caseCouranteNoirs=premiereCaseNoir.clone().add(0,0,7);
         String nomCase;
+        Material materiau = Material.GLOWSTONE;
         for (int i=0;i<64;i++){
             nomCase=Square.squareAt(i).toString();
 
             Block blocBlanc = getWorld().getBlockAt(caseCouranteBlancs.getBlockX()+1,caseCouranteBlancs.getBlockY(),caseCouranteBlancs.getBlockZ());
             Block blocNoir = getWorld().getBlockAt(caseCouranteNoirs.getBlockX()+1,caseCouranteNoirs.getBlockY(),caseCouranteNoirs.getBlockZ());
-            blocBlanc.setType(Material.STONE);
-            blocNoir.setType(Material.STONE);
+            blocBlanc.setType(materiau);
+            blocNoir.setType(materiau);
             Logique.setValeurCase(blocBlanc,nomCase);
             Logique.setValeurCase(blocNoir,nomCase);
 
@@ -381,7 +380,7 @@ public class Session{
         if (setAir){
             material=Material.AIR;
         }else{
-            material=Material.STONE;
+            material=Material.GLOWSTONE;
         }
         for (int i=0;i<64;i++){
             world.getBlockAt(caseCouranteBlancs).setType(material);

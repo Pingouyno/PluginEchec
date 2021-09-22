@@ -1,5 +1,6 @@
 package me.pepelucifer.echecs.events;
 
+import me.pepelucifer.echecs.logique.Logique;
 import me.pepelucifer.echecs.objets.LobbyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -125,6 +126,7 @@ public class Events extends EventLogique implements Listener{
             LobbyPlayer lobbyPlayer = getLobbyPlayer(event.getPlayer());
             disconnectPlayer(lobbyPlayer);
         }
+        event.getPlayer().teleport(Logique.worldSpawn);                                                         //#Cette ligne devrait être transférée dans le among us
     }
 
 

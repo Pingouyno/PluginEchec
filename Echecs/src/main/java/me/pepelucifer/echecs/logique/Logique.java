@@ -63,7 +63,7 @@ public class Logique {
             premiereCaseUniverselleBlanc = new Location(chessWorld,248,11,-191);
             premiereCaseUniverselleNoir = new Location(chessWorld,248,11,-179);
             premiereCaseDummyBoard = new Location(chessWorld,161,8,-203);                                        //Emplacement premiere case pour spritesheet du lobby
-            decalage = 100;
+            decalage = 17;
         }
         lobby = new Lobby();
         globalScoreBoard = Bukkit.getServer().getScoreboardManager().getMainScoreboard();

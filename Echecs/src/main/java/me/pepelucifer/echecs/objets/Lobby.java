@@ -131,20 +131,39 @@ public final class Lobby{
     }
 
 
-    public void clearAllDummyBoards(){                                                                                  //N'a pas besoin du uuid MAIS ne peut qu'être exécuté que lorsque le chunk en question est chargé
-        for (Entity e:getWorld().getEntities()){
-            if (e instanceof  ItemFrame){
-                ItemFrame cadre = (ItemFrame) e;
-                if (cadre.getCustomName()!=null && cadre.getCustomName().equals("dummy")){
-                    e.remove();
+    public void clearAllDummyBoardsInLoop(){                                                                                  //N'a pas besoin du uuid MAIS ne peut qu'être exécuté que lorsque le chunk en question est chargé, donc on doit faire une boucle jusqu'à ce qu'u joueur le fasse charger
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity e:getWorld().getEntities()){
+                    if (e instanceof  ItemFrame){
+                        ItemFrame cadre = (ItemFrame) e;
+                        if (cadre.getCustomName()!=null /*&& cadre.getCustomName().equals("dummy")*/){                      // J'ai dû enlever cette condition parce que sinon il spammait le catch dans la console
+                            e.remove();
+                        }
+                    }
+                }
+                try{                                                                                                       //Je sais que ce code est DÉGUEULASSE mais 1)Je suis tanné de ce bug   2)J'ai pas beaucoup de temps
+                    Location caseCourante=Logique.premiereCaseDummyBoard.clone();
+                    spawnBlocDerriereCadre(caseCourante,Material.STONE);
+                    Entity cadre=getWorld().spawnEntity(caseCourante, EntityType.ITEM_FRAME);
+                    cadre.setCustomName("dummy");
+                    ItemFrame frame = (ItemFrame) cadre;
+                    frame.setVisible(false);
+                    frame.setItem(ItemManager.emptySquares[0]);
+                    frame.setFacingDirection(BlockFace.SOUTH);
+                    cadre.remove();
+                    cancel();
+                    return;
+                }catch(Exception e){
+                    Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Spawning de dummy board raté.");
                 }
             }
-        }
+        }.runTaskTimer(Bukkit.getPluginManager().getPlugin("Echecs"), 0L, 20L);
     }
 
 
     public void spawnDummyBoards(){
-        clearAllDummyBoards();
+        clearAllDummyBoardsInLoop();
         ItemStack[][] allpieces = {ItemManager.whiteChessPiecesWhiteSquare,ItemManager.whiteChessPiecesBlackSquare,ItemManager.blackChessPiecesWhiteSquare,
                 ItemManager.blackChessPiecesBlackSquare,ItemManager.whiteChessPiecesWhiteSquareYellow,ItemManager.whiteChessPiecesBlackSquareYellow,ItemManager.blackChessPiecesWhiteSquareYellow,
                 ItemManager.blackChessPiecesBlackSquareYellow,ItemManager.emptySquares,ItemManager.emptySquaresYellow};

@@ -43,7 +43,7 @@ public class Commands extends Logique implements CommandExecutor {
             if (player.isOp()&&isInLobby(player)){
                 isEnDebugging=!isEnDebugging;
                 LobbyPlayer lobbyPlayer=getLobbyPlayer(player);
-                if (lobbyPlayer.isPlaying()){
+                if (lobbyPlayer!=null && lobbyPlayer.isPlaying()){
                     lobbyPlayer.getSession().testResetPanneauEchiquiers(isEnDebugging);
                 }
             }
